@@ -79,6 +79,7 @@ class KPIGlobaux(BaseModel):
     quantite_vendue: int
     profit_total: float
     marge_moyenne: float
+    marge_brute_par_commande: float
 
 class ProduitTop(BaseModel):
     produit: str
@@ -170,7 +171,8 @@ def get_kpi_globaux(
     quantite_vendue = int(df_filtered['Quantity'].sum())
     profit_total = df_filtered['Profit'].sum()
     marge_moyenne = (profit_total / ca_total * 100) if ca_total > 0 else 0
-    
+    marge_brute_par_commande = profit_total / nb_commandes if nb_commandes > 0 else 0
+
     return KPIGlobaux(
         ca_total=round(ca_total, 2),
         nb_commandes=nb_commandes,
@@ -178,7 +180,8 @@ def get_kpi_globaux(
         panier_moyen=round(panier_moyen, 2),
         quantite_vendue=quantite_vendue,
         profit_total=round(profit_total, 2),
-        marge_moyenne=round(marge_moyenne, 2)
+        marge_moyenne=round(marge_moyenne, 2),
+        marge_brute_par_commande=round(marge_brute_par_commande, 2)
     )
 
 @app.get("/kpi/produits/top", tags=["KPI"])
@@ -755,7 +758,331 @@ def get_top_villes(limite: int = Query(20, ge=5, le=100)):
         }
     }
 
-# === ENDPOINT CLIENTS ===
+# === ENDPOINTS CLIENTS AVANCÉS ===
+
+@app.get("/kpi/clients/rfm", tags=["KPI Avancés - Clients"])
+def get_segmentation_rfm():
+    """
+    📊 SEGMENTATION RFM (Recency, Frequency, Monetary)
+
+    Segmentation client basée sur:
+    - R: Récence du dernier achat
+    - F: Fréquence d'achat
+    - M: Montant total dépensé
+    """
+    # Date de référence (dernière date du dataset)
+    date_reference = df['Order Date'].max()
+
+    # Calcul RFM par client
+    rfm = df.groupby('Customer ID').agg({
+        'Order Date': lambda x: (date_reference - x.max()).days,  # Recency
+        'Order ID': 'nunique',  # Frequency
+        'Sales': 'sum'  # Monetary
+    }).reset_index()
+
+    rfm.columns = ['customer_id', 'recency', 'frequency', 'monetary']
+
+    # Ajout du nom client
+    client_names = df.groupby('Customer ID')['Customer Name'].first().reset_index()
+    rfm = rfm.merge(client_names, left_on='customer_id', right_on='Customer ID', how='left')
+    rfm = rfm.drop('Customer ID', axis=1)
+
+    # Calcul des scores RFM (quintiles inversés pour R, normaux pour F et M)
+    rfm['r_score'] = pd.qcut(rfm['recency'], q=5, labels=[5, 4, 3, 2, 1], duplicates='drop')
+    rfm['f_score'] = pd.qcut(rfm['frequency'].rank(method='first'), q=5, labels=[1, 2, 3, 4, 5], duplicates='drop')
+    rfm['m_score'] = pd.qcut(rfm['monetary'].rank(method='first'), q=5, labels=[1, 2, 3, 4, 5], duplicates='drop')
+
+    # Score RFM global
+    rfm['rfm_score'] = rfm['r_score'].astype(str) + rfm['f_score'].astype(str) + rfm['m_score'].astype(str)
+    rfm['rfm_score_value'] = rfm['r_score'].astype(int) + rfm['f_score'].astype(int) + rfm['m_score'].astype(int)
+
+    # Segmentation client
+    def segment_client(row):
+        r, f, m = int(row['r_score']), int(row['f_score']), int(row['m_score'])
+
+        if r >= 4 and f >= 4 and m >= 4:
+            return "Champions 🏆"
+        elif r >= 3 and f >= 3 and m >= 3:
+            return "Fidèles 💎"
+        elif r >= 4 and f <= 2:
+            return "Nouveaux 🌱"
+        elif r <= 2 and f >= 3:
+            return "À risque ⚠️"
+        elif r <= 2 and f <= 2:
+            return "Perdus 💔"
+        elif m >= 4:
+            return "Gros dépensiers 💰"
+        else:
+            return "Occasionnels 📊"
+
+    rfm['segment'] = rfm.apply(segment_client, axis=1)
+
+    # Statistiques par segment
+    segment_stats = rfm.groupby('segment').agg({
+        'customer_id': 'count',
+        'recency': 'mean',
+        'frequency': 'mean',
+        'monetary': ['mean', 'sum']
+    }).reset_index()
+
+    segment_stats.columns = ['segment', 'nb_clients', 'recency_moy', 'frequency_moy', 'monetary_moy', 'ca_total']
+    segment_stats['pct_clients'] = (segment_stats['nb_clients'] / len(rfm) * 100).round(2)
+
+    # Top clients
+    top_clients_rfm = rfm.nlargest(20, 'rfm_score_value')
+
+    result_clients = []
+    for _, row in top_clients_rfm.iterrows():
+        result_clients.append({
+            "client": row['Customer Name'],
+            "recency": int(row['recency']),
+            "frequency": int(row['frequency']),
+            "monetary": round(row['monetary'], 2),
+            "rfm_score": row['rfm_score'],
+            "segment": row['segment']
+        })
+
+    return {
+        "top_clients": result_clients,
+        "segments": segment_stats.to_dict('records'),
+        "statistiques": {
+            "nb_total_clients": len(rfm),
+            "recency_moyenne": round(rfm['recency'].mean(), 1),
+            "frequency_moyenne": round(rfm['frequency'].mean(), 2),
+            "monetary_moyenne": round(rfm['monetary'].mean(), 2)
+        }
+    }
+
+@app.get("/kpi/clients/delai-rachat", tags=["KPI Avancés - Clients"])
+def get_delai_rachat():
+    """
+    🔄 DÉLAI MOYEN DE RÉACHAT
+
+    Analyse du temps moyen entre deux achats par client
+    """
+    try:
+        # Tri par client et date - on doit dédupliquer les commandes du même jour
+        df_temp = df[['Customer ID', 'Order Date', 'Segment', 'Order ID']].copy()
+
+        # Garder une seule ligne par client et par date (certains clients peuvent avoir plusieurs commandes le même jour)
+        df_temp = df_temp.sort_values(['Customer ID', 'Order Date', 'Order ID']).drop_duplicates(
+            subset=['Customer ID', 'Order Date'],
+            keep='first'
+        )
+
+        df_sorted = df_temp[['Customer ID', 'Order Date', 'Segment']].sort_values(['Customer ID', 'Order Date']).copy()
+
+        # Calcul du délai entre achats
+        df_sorted['prev_order_date'] = df_sorted.groupby('Customer ID')['Order Date'].shift(1)
+        df_sorted['days_since_last_order'] = (df_sorted['Order Date'] - df_sorted['prev_order_date']).dt.days
+
+        # Clients avec au moins 2 achats (exclure les délais de 0 jour qui sont des commandes multiples le même jour)
+        delais = df_sorted[
+            (df_sorted['days_since_last_order'].notna()) &
+            (df_sorted['days_since_last_order'] > 0)
+        ].copy()
+
+        logger.info(f"📊 Délai de réachat - {len(delais)} rachats trouvés")
+
+        if len(delais) == 0:
+            logger.warning("⚠️ Aucun rachat trouvé")
+            return {
+                "statistiques": {
+                    "delai_moyen_jours": 0,
+                    "delai_median_jours": 0,
+                    "nb_rachats_total": 0
+                },
+                "par_segment": [],
+                "distribution": {}
+            }
+
+        # Statistiques globales
+        delai_moyen = delais['days_since_last_order'].mean()
+        delai_median = delais['days_since_last_order'].median()
+
+        logger.info(f"📈 Délai moyen: {delai_moyen:.1f}j, médian: {delai_median:.1f}j")
+
+        # Par segment
+        segment_delais = delais.groupby('Segment').agg({
+            'days_since_last_order': ['mean', 'median', 'count']
+        }).reset_index()
+
+        segment_delais.columns = ['segment', 'delai_moyen', 'delai_median', 'nb_rachats']
+
+        # Distribution des délais
+        delai_bins = pd.cut(
+            delais['days_since_last_order'],
+            bins=[0, 30, 60, 90, 180, 365, 999999],
+            labels=['<30j', '30-60j', '60-90j', '90-180j', '180-365j', '>365j']
+        )
+
+        distribution = delai_bins.value_counts().sort_index()
+
+        return {
+            "statistiques": {
+                "delai_moyen_jours": round(delai_moyen, 1) if not pd.isna(delai_moyen) else 0,
+                "delai_median_jours": round(delai_median, 1) if not pd.isna(delai_median) else 0,
+                "nb_rachats_total": len(delais)
+            },
+            "par_segment": segment_delais.to_dict('records'),
+            "distribution": {str(k): int(v) for k, v in distribution.items()}
+        }
+    except Exception as e:
+        logger.error(f"❌ Erreur dans get_delai_rachat : {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Erreur lors du calcul du délai de réachat : {str(e)}")
+
+@app.get("/kpi/clients/clv", tags=["KPI Avancés - Clients"])
+def get_customer_lifetime_value(limite: int = Query(50, ge=10, le=200)):
+    """
+    💰 CUSTOMER LIFETIME VALUE (CLV)
+
+    Valeur vie client avec projections
+    """
+    # Calculs par client
+    clients_clv = df.groupby('Customer ID').agg({
+        'Sales': 'sum',
+        'Profit': 'sum',
+        'Order ID': 'nunique',
+        'Order Date': ['min', 'max'],
+        'Customer Name': 'first'
+    }).reset_index()
+
+    clients_clv.columns = ['customer_id', 'ca_total', 'profit_total', 'nb_commandes', 'first_order', 'last_order', 'nom']
+
+    # Durée de vie client (en jours)
+    clients_clv['lifetime_days'] = (clients_clv['last_order'] - clients_clv['first_order']).dt.days
+    clients_clv['lifetime_days'] = clients_clv['lifetime_days'].replace(0, 1)  # Éviter division par 0
+
+    # Calculs CLV
+    clients_clv['ca_moyen_commande'] = clients_clv['ca_total'] / clients_clv['nb_commandes']
+    clients_clv['frequence_achat_annuelle'] = clients_clv['nb_commandes'] / (clients_clv['lifetime_days'] / 365)
+    clients_clv['ca_annuel'] = clients_clv['ca_total'] / (clients_clv['lifetime_days'] / 365)
+
+    # CLV projetée sur 3 ans (simple)
+    clients_clv['clv_3_ans'] = clients_clv['ca_annuel'] * 3
+    clients_clv['profit_annuel'] = clients_clv['profit_total'] / (clients_clv['lifetime_days'] / 365)
+    clients_clv['profit_clv_3_ans'] = clients_clv['profit_annuel'] * 3
+
+    # Classification
+    clv_median = clients_clv['clv_3_ans'].median()
+
+    def classify_clv(clv_value):
+        if clv_value >= clv_median * 2:
+            return "Très élevée 🌟"
+        elif clv_value >= clv_median:
+            return "Élevée 💎"
+        elif clv_value >= clv_median * 0.5:
+            return "Moyenne 📊"
+        else:
+            return "Faible 📉"
+
+    clients_clv['categorie_clv'] = clients_clv['clv_3_ans'].apply(classify_clv)
+
+    # Top clients par CLV
+    top_clv = clients_clv.nlargest(limite, 'clv_3_ans')
+
+    result = []
+    for _, row in top_clv.iterrows():
+        result.append({
+            "client": row['nom'],
+            "ca_total": round(row['ca_total'], 2),
+            "nb_commandes": int(row['nb_commandes']),
+            "ca_annuel": round(row['ca_annuel'], 2),
+            "clv_3_ans": round(row['clv_3_ans'], 2),
+            "profit_clv_3_ans": round(row['profit_clv_3_ans'], 2),
+            "categorie": row['categorie_clv'],
+            "lifetime_days": int(row['lifetime_days'])
+        })
+
+    # Statistiques par catégorie
+    cat_stats = clients_clv.groupby('categorie_clv').agg({
+        'customer_id': 'count',
+        'clv_3_ans': 'sum',
+        'profit_clv_3_ans': 'sum'
+    }).reset_index()
+    cat_stats.columns = ['categorie', 'nb_clients', 'clv_total', 'profit_total']
+
+    return {
+        "top_clients": result,
+        "statistiques": {
+            "clv_moyenne": round(clients_clv['clv_3_ans'].mean(), 2),
+            "clv_mediane": round(clv_median, 2),
+            "ca_annuel_moyen": round(clients_clv['ca_annuel'].mean(), 2)
+        },
+        "par_categorie": cat_stats.to_dict('records')
+    }
+
+@app.get("/kpi/clients/retention", tags=["KPI Avancés - Clients"])
+def get_taux_retention():
+    """
+    📈 TAUX DE RÉTENTION (COHORT)
+
+    Analyse de la rétention client par cohorte (mois de première commande)
+    """
+    # Préparation des données
+    df_cohort = df.copy()
+    df_cohort['order_month'] = df_cohort['Order Date'].dt.to_period('M')
+
+    # Première commande par client (cohorte)
+    first_purchase = df_cohort.groupby('Customer ID')['order_month'].min().reset_index()
+    first_purchase.columns = ['Customer ID', 'cohort_month']
+
+    # Merge avec les données
+    df_cohort = df_cohort.merge(first_purchase, on='Customer ID')
+
+    # Calcul de l'ancienneté (en mois depuis première commande)
+    df_cohort['months_since_first'] = (df_cohort['order_month'] - df_cohort['cohort_month']).apply(lambda x: x.n)
+
+    # Matrice de cohorte
+    cohort_data = df_cohort.groupby(['cohort_month', 'months_since_first']).agg({
+        'Customer ID': 'nunique'
+    }).reset_index()
+
+    cohort_data.columns = ['cohort', 'period', 'nb_clients']
+
+    # Pivot pour avoir les périodes en colonnes
+    cohort_pivot = cohort_data.pivot_table(
+        index='cohort',
+        columns='period',
+        values='nb_clients',
+        fill_value=0
+    )
+
+    # Calcul des taux de rétention (% par rapport à la période 0)
+    cohort_size = cohort_pivot.iloc[:, 0]
+    retention_matrix = cohort_pivot.divide(cohort_size, axis=0) * 100
+
+    # Prendre les 12 dernières cohortes pour lisibilité
+    retention_matrix_recent = retention_matrix.tail(12)
+
+    # Conversion en format pour le frontend
+    retention_data = []
+    for idx, row in retention_matrix_recent.iterrows():
+        cohort_row = {"cohort": str(idx)}
+        for col in row.index[:12]:  # Limiter à 12 périodes
+            if col in row.index:
+                cohort_row[f"month_{col}"] = round(row[col], 1)
+        retention_data.append(cohort_row)
+
+    # Statistiques globales
+    # Taux de rétention à 1 mois, 3 mois, 6 mois
+    retention_1m = retention_matrix[1].mean() if 1 in retention_matrix.columns else 0
+    retention_3m = retention_matrix[3].mean() if 3 in retention_matrix.columns else 0
+    retention_6m = retention_matrix[6].mean() if 6 in retention_matrix.columns else 0
+
+    return {
+        "cohort_data": retention_data,
+        "statistiques": {
+            "retention_1_mois": round(retention_1m, 2),
+            "retention_3_mois": round(retention_3m, 2),
+            "retention_6_mois": round(retention_6m, 2),
+            "nb_cohortes": len(cohort_pivot)
+        }
+    }
+
+# === ENDPOINT CLIENTS (EXISTANT) ===
 
 @app.get("/kpi/clients", tags=["KPI"])
 def get_analyse_clients(
@@ -792,6 +1119,485 @@ def get_analyse_clients(
         "top_clients": top_clients.to_dict('records'),
         "recurrence": recurrence,
         "segments": segments.to_dict('records')
+    }
+
+# === ENDPOINT ANALYSE ABC (PARETO) ===
+
+@app.get("/kpi/analyse-abc", tags=["KPI Avancés - Analyse ABC"])
+def get_analyse_abc(niveau: str = Query("produit", regex="^(produit|categorie|client)$")):
+    """
+    📊 ANALYSE ABC (PARETO)
+
+    Segmentation selon le principe 80/20 (Pareto):
+    - Classe A : 80% du CA (produits/clients les plus importants)
+    - Classe B : 15% du CA (importance moyenne)
+    - Classe C : 5% du CA (faible importance)
+
+    Niveaux d'analyse : produit, categorie, client
+    """
+
+    if niveau == "produit":
+        # Analyse par produit
+        data = df.groupby(['Product Name', 'Category']).agg({
+            'Sales': 'sum',
+            'Profit': 'sum',
+            'Quantity': 'sum'
+        }).reset_index()
+
+        data.columns = ['nom', 'categorie', 'ca', 'profit', 'quantite']
+        data = data.sort_values('ca', ascending=False).reset_index(drop=True)
+
+        # Calcul cumulatif
+        data['ca_cumul'] = data['ca'].cumsum()
+        ca_total = data['ca'].sum()
+        data['pct_cumul'] = (data['ca_cumul'] / ca_total * 100).round(2)
+        data['pct_ca'] = (data['ca'] / ca_total * 100).round(2)
+
+        # Classification ABC
+        def classify_abc(pct):
+            if pct <= 80:
+                return "A 🌟"
+            elif pct <= 95:
+                return "B 📊"
+            else:
+                return "C 📉"
+
+        data['classe'] = data['pct_cumul'].apply(classify_abc)
+
+    elif niveau == "categorie":
+        # Analyse par catégorie
+        data = df.groupby('Category').agg({
+            'Sales': 'sum',
+            'Profit': 'sum',
+            'Quantity': 'sum'
+        }).reset_index()
+
+        data.columns = ['nom', 'ca', 'profit', 'quantite']
+        data = data.sort_values('ca', ascending=False).reset_index(drop=True)
+        data['categorie'] = data['nom']  # Pour cohérence
+
+        # Calcul cumulatif
+        data['ca_cumul'] = data['ca'].cumsum()
+        ca_total = data['ca'].sum()
+        data['pct_cumul'] = (data['ca_cumul'] / ca_total * 100).round(2)
+        data['pct_ca'] = (data['ca'] / ca_total * 100).round(2)
+
+        def classify_abc(pct):
+            if pct <= 80:
+                return "A 🌟"
+            elif pct <= 95:
+                return "B 📊"
+            else:
+                return "C 📉"
+
+        data['classe'] = data['pct_cumul'].apply(classify_abc)
+
+    else:  # client
+        # Analyse par client
+        data = df.groupby(['Customer ID', 'Customer Name']).agg({
+            'Sales': 'sum',
+            'Profit': 'sum',
+            'Order ID': 'nunique'
+        }).reset_index()
+
+        data.columns = ['customer_id', 'nom', 'ca', 'profit', 'nb_commandes']
+        data = data.sort_values('ca', ascending=False).reset_index(drop=True)
+        data['categorie'] = 'Client'  # Pour cohérence
+
+        # Calcul cumulatif
+        data['ca_cumul'] = data['ca'].cumsum()
+        ca_total = data['ca'].sum()
+        data['pct_cumul'] = (data['ca_cumul'] / ca_total * 100).round(2)
+        data['pct_ca'] = (data['ca'] / ca_total * 100).round(2)
+
+        def classify_abc(pct):
+            if pct <= 80:
+                return "A 🌟"
+            elif pct <= 95:
+                return "B 📊"
+            else:
+                return "C 📉"
+
+        data['classe'] = data['pct_cumul'].apply(classify_abc)
+
+    # Statistiques par classe
+    stats_classes = data.groupby('classe').agg({
+        'nom': 'count',
+        'ca': 'sum',
+        'profit': 'sum'
+    }).reset_index()
+
+    stats_classes.columns = ['classe', 'nombre', 'ca_total', 'profit_total']
+    stats_classes['pct_nombre'] = (stats_classes['nombre'] / len(data) * 100).round(2)
+    stats_classes['pct_ca'] = (stats_classes['ca_total'] / ca_total * 100).round(2)
+
+    # Préparer les données pour le retour
+    result = []
+    for _, row in data.iterrows():
+        result.append({
+            "nom": row['nom'],
+            "categorie": row.get('categorie', ''),
+            "ca": round(row['ca'], 2),
+            "profit": round(row['profit'], 2),
+            "pct_ca": row['pct_ca'],
+            "pct_cumul": row['pct_cumul'],
+            "classe": row['classe']
+        })
+
+    return {
+        "data": result,
+        "niveau": niveau,
+        "statistiques": {
+            "total_elements": len(data),
+            "ca_total": round(ca_total, 2)
+        },
+        "par_classe": stats_classes.to_dict('records')
+    }
+
+# === ENDPOINTS ANALYSE DÉTAILLÉE ===
+
+@app.get("/kpi/commandes/deficitaires", tags=["KPI Avancés - Analyse Détaillée"])
+def get_commandes_deficitaires(limite: int = Query(50, ge=10, le=200)):
+    """
+    🔴 COMMANDES DÉFICITAIRES
+
+    Liste des commandes ayant généré une perte
+    """
+    # Agrégation par commande
+    commandes = df.groupby('Order ID').agg({
+        'Sales': 'sum',
+        'Profit': 'sum',
+        'Quantity': 'sum',
+        'Discount': 'mean',
+        'Order Date': 'first',
+        'Customer Name': 'first',
+        'Category': lambda x: ', '.join(x.unique())
+    }).reset_index()
+
+    commandes['marge_pct'] = (commandes['Profit'] / commandes['Sales'] * 100).replace([np.inf, -np.inf], 0).fillna(0)
+
+    # Filtrer les commandes déficitaires (profit négatif)
+    deficitaires = commandes[commandes['Profit'] < 0].copy()
+    deficitaires = deficitaires.sort_values('Profit', ascending=True).head(limite)
+
+    result = []
+    for _, row in deficitaires.iterrows():
+        result.append({
+            "order_id": row['Order ID'],
+            "date": row['Order Date'].strftime('%Y-%m-%d'),
+            "client": row['Customer Name'],
+            "categories": row['Category'],
+            "ca": round(row['Sales'], 2),
+            "profit": round(row['Profit'], 2),
+            "perte_abs": round(abs(row['Profit']), 2),
+            "marge_pct": round(row['marge_pct'], 2),
+            "quantite": int(row['Quantity']),
+            "discount_moyen": round(row['Discount'] * 100, 2)
+        })
+
+    # Statistiques
+    total_perte = abs(deficitaires['Profit'].sum())
+    nb_total_deficitaires = len(commandes[commandes['Profit'] < 0])
+
+    return {
+        "data": result,
+        "statistiques": {
+            "nb_commandes_deficitaires": nb_total_deficitaires,
+            "perte_totale": round(total_perte, 2),
+            "perte_moyenne": round(total_perte / nb_total_deficitaires, 2) if nb_total_deficitaires > 0 else 0,
+            "pct_commandes_deficitaires": round(nb_total_deficitaires / len(commandes) * 100, 2)
+        }
+    }
+
+@app.get("/kpi/remises/impact", tags=["KPI Avancés - Analyse Détaillée"])
+def get_impact_remises():
+    """
+    💸 IMPACT DES REMISES (DISCOUNT)
+
+    Analyse de l'impact des remises sur la rentabilité
+    """
+    # Créer des tranches de remise
+    df_discount = df.copy()
+    df_discount['tranche_discount'] = pd.cut(
+        df_discount['Discount'] * 100,
+        bins=[0, 5, 10, 15, 20, 100],
+        labels=['0-5%', '5-10%', '10-15%', '15-20%', '>20%'],
+        include_lowest=True
+    )
+
+    # Agrégation par tranche
+    impact = df_discount.groupby('tranche_discount', observed=True).agg({
+        'Sales': 'sum',
+        'Profit': 'sum',
+        'Order ID': 'nunique',
+        'Quantity': 'sum'
+    }).reset_index()
+
+    impact['marge_pct'] = (impact['Profit'] / impact['Sales'] * 100).replace([np.inf, -np.inf], 0).fillna(0)
+    impact['ca_moyen'] = impact['Sales'] / impact['Order ID']
+
+    result = []
+    for _, row in impact.iterrows():
+        result.append({
+            "tranche_discount": str(row['tranche_discount']),
+            "nb_commandes": int(row['Order ID']),
+            "ca_total": round(row['Sales'], 2),
+            "profit_total": round(row['Profit'], 2),
+            "marge_pct": round(row['marge_pct'], 2),
+            "ca_moyen": round(row['ca_moyen'], 2),
+            "quantite": int(row['Quantity'])
+        })
+
+    # Statistiques globales
+    ca_total = df['Sales'].sum()
+    profit_total = df['Profit'].sum()
+    ca_avec_discount = df[df['Discount'] > 0]['Sales'].sum()
+    profit_avec_discount = df[df['Discount'] > 0]['Profit'].sum()
+    ca_sans_discount = df[df['Discount'] == 0]['Sales'].sum()
+    profit_sans_discount = df[df['Discount'] == 0]['Profit'].sum()
+
+    return {
+        "data": result,
+        "statistiques": {
+            "ca_avec_discount": round(ca_avec_discount, 2),
+            "profit_avec_discount": round(profit_avec_discount, 2),
+            "marge_avec_discount": round(profit_avec_discount / ca_avec_discount * 100, 2) if ca_avec_discount > 0 else 0,
+            "ca_sans_discount": round(ca_sans_discount, 2),
+            "profit_sans_discount": round(profit_sans_discount, 2),
+            "marge_sans_discount": round(profit_sans_discount / ca_sans_discount * 100, 2) if ca_sans_discount > 0 else 0,
+            "pct_ca_avec_discount": round(ca_avec_discount / ca_total * 100, 2)
+        }
+    }
+
+@app.get("/kpi/produits/cout-prix", tags=["KPI Avancés - Analyse Détaillée"])
+def get_cout_prix_unitaire(limite: int = Query(30, ge=10, le=100)):
+    """
+    💰 COÛT & PRIX UNITAIRE
+
+    Analyse du coût et prix unitaire par produit
+    """
+    produits = df.groupby(['Product Name', 'Category']).agg({
+        'Sales': 'sum',
+        'Profit': 'sum',
+        'Quantity': 'sum'
+    }).reset_index()
+
+    # Calculs
+    produits['prix_unitaire'] = produits['Sales'] / produits['Quantity']
+    produits['marge_unitaire'] = produits['Profit'] / produits['Quantity']
+    produits['cout_unitaire'] = produits['prix_unitaire'] - produits['marge_unitaire']
+    produits['marge_pct'] = (produits['Profit'] / produits['Sales'] * 100).replace([np.inf, -np.inf], 0).fillna(0)
+
+    # Tri par CA décroissant
+    produits = produits.sort_values('Sales', ascending=False).head(limite)
+
+    result = []
+    for _, row in produits.iterrows():
+        result.append({
+            "produit": row['Product Name'],
+            "categorie": row['Category'],
+            "prix_unitaire": round(row['prix_unitaire'], 2),
+            "cout_unitaire": round(row['cout_unitaire'], 2),
+            "marge_unitaire": round(row['marge_unitaire'], 2),
+            "marge_pct": round(row['marge_pct'], 2),
+            "quantite_vendue": int(row['Quantity']),
+            "ca_total": round(row['Sales'], 2)
+        })
+
+    # Statistiques
+    return {
+        "data": result,
+        "statistiques": {
+            "prix_unitaire_moyen": round(produits['prix_unitaire'].mean(), 2),
+            "cout_unitaire_moyen": round(produits['cout_unitaire'].mean(), 2),
+            "marge_unitaire_moyenne": round(produits['marge_unitaire'].mean(), 2)
+        }
+    }
+
+# === ENDPOINTS LIVRAISONS ===
+
+@app.get("/kpi/livraisons/delais", tags=["KPI Avancés - Livraisons"])
+def get_delais_livraison():
+    """
+    📦 DÉLAI DE LIVRAISON RÉEL
+
+    Analyse des délais entre commande et livraison
+    """
+    df_delais = df.copy()
+
+    # Calcul du délai de livraison en jours
+    df_delais['delai_livraison'] = (df_delais['Ship Date'] - df_delais['Order Date']).dt.days
+
+    # Statistiques globales
+    delai_moyen = df_delais['delai_livraison'].mean()
+    delai_median = df_delais['delai_livraison'].median()
+    delai_min = df_delais['delai_livraison'].min()
+    delai_max = df_delais['delai_livraison'].max()
+
+    # Par mode d'expédition
+    delais_mode = df_delais.groupby('Ship Mode').agg({
+        'delai_livraison': ['mean', 'median', 'min', 'max', 'count']
+    }).reset_index()
+
+    delais_mode.columns = ['mode', 'delai_moyen', 'delai_median', 'delai_min', 'delai_max', 'nb_commandes']
+
+    # Distribution des délais
+    delai_bins = pd.cut(
+        df_delais['delai_livraison'],
+        bins=[0, 2, 4, 7, 14, 30, 999],
+        labels=['0-2j', '2-4j', '4-7j', '7-14j', '14-30j', '>30j']
+    )
+
+    distribution = delai_bins.value_counts().sort_index()
+
+    # Par région
+    delais_region = df_delais.groupby('Region').agg({
+        'delai_livraison': ['mean', 'median']
+    }).reset_index()
+
+    delais_region.columns = ['region', 'delai_moyen', 'delai_median']
+
+    return {
+        "statistiques": {
+            "delai_moyen_jours": round(delai_moyen, 1),
+            "delai_median_jours": round(delai_median, 1),
+            "delai_min_jours": int(delai_min),
+            "delai_max_jours": int(delai_max)
+        },
+        "par_mode": delais_mode.to_dict('records'),
+        "par_region": delais_region.to_dict('records'),
+        "distribution": {str(k): int(v) for k, v in distribution.items()}
+    }
+
+@app.get("/kpi/livraisons/retards", tags=["KPI Avancés - Livraisons"])
+def get_taux_retards():
+    """
+    ⏰ TAUX DE LIVRAISONS TARDIVES
+
+    Analyse des retards de livraison (délai > 7 jours considéré comme tardif)
+    """
+    df_retards = df.copy()
+
+    # Calcul du délai
+    df_retards['delai_livraison'] = (df_retards['Ship Date'] - df_retards['Order Date']).dt.days
+
+    # Définition d'un retard : selon le mode d'expédition
+    seuils_retard = {
+        'Standard Class': 7,
+        'Second Class': 5,
+        'First Class': 3,
+        'Same Day': 1
+    }
+
+    def est_en_retard(row):
+        seuil = seuils_retard.get(row['Ship Mode'], 7)
+        return row['delai_livraison'] > seuil
+
+    df_retards['est_retard'] = df_retards.apply(est_en_retard, axis=1)
+
+    # Statistiques globales
+    nb_total = len(df_retards)
+    nb_retards = df_retards['est_retard'].sum()
+    taux_retard = (nb_retards / nb_total * 100) if nb_total > 0 else 0
+
+    # Par mode d'expédition
+    retards_mode = df_retards.groupby('Ship Mode').agg({
+        'est_retard': ['sum', 'count']
+    }).reset_index()
+
+    retards_mode.columns = ['mode', 'nb_retards', 'nb_total']
+    retards_mode['taux_retard'] = (retards_mode['nb_retards'] / retards_mode['nb_total'] * 100).round(2)
+
+    # Par région
+    retards_region = df_retards.groupby('Region').agg({
+        'est_retard': ['sum', 'count']
+    }).reset_index()
+
+    retards_region.columns = ['region', 'nb_retards', 'nb_total']
+    retards_region['taux_retard'] = (retards_region['nb_retards'] / retards_region['nb_total'] * 100).round(2)
+
+    # Par catégorie
+    retards_categorie = df_retards.groupby('Category').agg({
+        'est_retard': ['sum', 'count']
+    }).reset_index()
+
+    retards_categorie.columns = ['categorie', 'nb_retards', 'nb_total']
+    retards_categorie['taux_retard'] = (retards_categorie['nb_retards'] / retards_categorie['nb_total'] * 100).round(2)
+
+    return {
+        "statistiques": {
+            "nb_total_livraisons": nb_total,
+            "nb_retards": int(nb_retards),
+            "taux_retard_global": round(taux_retard, 2)
+        },
+        "par_mode": retards_mode.to_dict('records'),
+        "par_region": retards_region.to_dict('records'),
+        "par_categorie": retards_categorie.to_dict('records'),
+        "seuils_utilises": seuils_retard
+    }
+
+@app.get("/kpi/livraisons/performance-mode", tags=["KPI Avancés - Livraisons"])
+def get_performance_par_mode():
+    """
+    🚚 PERFORMANCE PAR MODE D'EXPÉDITION
+
+    Analyse complète de chaque mode d'expédition
+    """
+    df_mode = df.copy()
+
+    # Calcul du délai
+    df_mode['delai_livraison'] = (df_mode['Ship Date'] - df_mode['Order Date']).dt.days
+
+    # Agrégation par mode
+    perf_mode = df_mode.groupby('Ship Mode').agg({
+        'Sales': 'sum',
+        'Profit': 'sum',
+        'Order ID': 'nunique',
+        'delai_livraison': ['mean', 'median'],
+        'Quantity': 'sum'
+    }).reset_index()
+
+    perf_mode.columns = ['mode', 'ca', 'profit', 'nb_commandes', 'delai_moyen', 'delai_median', 'quantite']
+
+    # Calculs supplémentaires
+    perf_mode['marge_pct'] = (perf_mode['profit'] / perf_mode['ca'] * 100).replace([np.inf, -np.inf], 0).fillna(0)
+    perf_mode['ca_moyen'] = perf_mode['ca'] / perf_mode['nb_commandes']
+    perf_mode['pct_commandes'] = (perf_mode['nb_commandes'] / perf_mode['nb_commandes'].sum() * 100).round(2)
+
+    # Tri par nombre de commandes
+    perf_mode = perf_mode.sort_values('nb_commandes', ascending=False)
+
+    result = []
+    for _, row in perf_mode.iterrows():
+        result.append({
+            "mode": row['mode'],
+            "ca": round(row['ca'], 2),
+            "profit": round(row['profit'], 2),
+            "marge_pct": round(row['marge_pct'], 2),
+            "nb_commandes": int(row['nb_commandes']),
+            "pct_commandes": row['pct_commandes'],
+            "ca_moyen": round(row['ca_moyen'], 2),
+            "delai_moyen": round(row['delai_moyen'], 1),
+            "delai_median": round(row['delai_median'], 1),
+            "quantite": int(row['quantite'])
+        })
+
+    # Mode le plus rentable
+    mode_plus_rentable = perf_mode.loc[perf_mode['profit'].idxmax(), 'mode']
+
+    # Mode le plus rapide
+    mode_plus_rapide = perf_mode.loc[perf_mode['delai_moyen'].idxmin(), 'mode']
+
+    # Mode le plus utilisé
+    mode_plus_utilise = perf_mode.loc[perf_mode['nb_commandes'].idxmax(), 'mode']
+
+    return {
+        "data": result,
+        "insights": {
+            "mode_plus_rentable": mode_plus_rentable,
+            "mode_plus_rapide": mode_plus_rapide,
+            "mode_plus_utilise": mode_plus_utilise
+        }
     }
 
 @app.get("/filters/valeurs", tags=["Filtres"])
