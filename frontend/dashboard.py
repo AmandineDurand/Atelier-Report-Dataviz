@@ -798,32 +798,33 @@ with tab2:
         st.plotly_chart(fig_pareto, use_container_width=True)
 
         # Tableau détaillé avec filtrage par classe
-        st.markdown("#### 📋 Tableau Détaillé")
+        with st.expander("📋 Tableau détaillé des variations"):
+            st.markdown("#### 📋 Tableau Détaillé")
 
-        classe_filter = st.selectbox(
-            "Filtrer par classe",
-            options=['Toutes'] + list(df_abc_full['classe'].unique()),
-            key="abc_filter"
-        )
+            classe_filter = st.selectbox(
+                "Filtrer par classe",
+                options=['Toutes'] + list(df_abc_full['classe'].unique()),
+                key="abc_filter"
+            )
 
-        if classe_filter == 'Toutes':
-            df_abc_filtered = df_abc_full.head(100)  # Limiter à 100 pour performance
-        else:
-            df_abc_filtered = df_abc_full[df_abc_full['classe'] == classe_filter].head(100)
+            if classe_filter == 'Toutes':
+                df_abc_filtered = df_abc_full.head(100)  # Limiter à 100 pour performance
+            else:
+                df_abc_filtered = df_abc_full[df_abc_full['classe'] == classe_filter].head(100)
 
-        st.dataframe(
-            df_abc_filtered[['nom', 'categorie', 'ca', 'profit', 'pct_ca', 'pct_cumul', 'classe']].rename(columns={
-                'nom': 'Nom',
-                'categorie': 'Catégorie',
-                'ca': 'CA (€)',
-                'profit': 'Profit (€)',
-                'pct_ca': '% CA',
-                'pct_cumul': '% Cumulé',
-                'classe': 'Classe'
-            }),
-            use_container_width=True,
-            hide_index=True
-        )
+            st.dataframe(
+                df_abc_filtered[['nom', 'categorie', 'ca', 'profit', 'pct_ca', 'pct_cumul', 'classe']].rename(columns={
+                    'nom': 'Nom',
+                    'categorie': 'Catégorie',
+                    'ca': 'CA (€)',
+                    'profit': 'Profit (€)',
+                    'pct_ca': '% CA',
+                    'pct_cumul': '% Cumulé',
+                    'classe': 'Classe'
+                }),
+                use_container_width=True,
+                hide_index=True
+            ) 
 
 # =============================================
 # TAB 3 : ÉVOLUTION TEMPORELLE
@@ -1267,43 +1268,43 @@ with tab5:
             taux_fid = (rec['clients_recurrents'] / rec['total_clients'] * 100) if rec['total_clients'] > 0 else 0
             st.metric("Taux fidélisation", f"{taux_fid:.1f}%")
 
-    st.markdown(
-        """
-        <div class="info-card">
-            <div class="info-title">Data Storytelling</div>
-            Avec <b>98,5 % de clients récurrents</b>, l’entreprise affiche une <b>fidélisation exceptionnelle</b> et 
-            des relations commerciales régulières (<b>6,3 commandes par client</b>).
-            Le faible nombre de nouveaux clients suggère une <b>phase de maturité</b> ou un ralentissement de 
-            l’acquisition.
-            Enfin, la répartition homogène du chiffre d’affaires du <b>top 10 clients</b> indique une 
-            <b>base clients équilibrée</b>, sans dépendance excessive à un compte unique.
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                Avec <b>98,5 % de clients récurrents</b>, l’entreprise affiche une <b>fidélisation exceptionnelle</b> et 
+                des relations commerciales régulières (<b>6,3 commandes par client</b>).
+                Le faible nombre de nouveaux clients suggère une <b>phase de maturité</b> ou un ralentissement de 
+                l’acquisition.
+                Enfin, la répartition homogène du chiffre d’affaires du <b>top 10 clients</b> indique une 
+                <b>base clients équilibrée</b>, sans dépendance excessive à un compte unique.
+                </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Segments
+        df_segments = pd.DataFrame(clients_data['segments'])
+        fig_segments = go.Figure()
+        fig_segments.add_trace(go.Bar(name='CA', x=df_segments['segment'], y=df_segments['ca'], marker_color='#3498db'))
+        fig_segments.add_trace(go.Bar(name='Profit', x=df_segments['segment'], y=df_segments['profit'], marker_color='#2ecc71'))
+        fig_segments.update_layout(title="CA et Profit par Segment", barmode='group', height=350)
+        st.plotly_chart(fig_segments, use_container_width=True)
+
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                Le segment <b>Consumer</b> domine largement le chiffre d’affaires (> <b>1,2 M€</b>), loin devant les 
+                segments Corporate et Home Office.
+                Cependant, les écarts de <b>marge</b> suggèrent que ces segments plus modestes pourraient offrir 
+                une <b>rentabilité ou une stabilité supérieure</b>.
+                Cette structure pose un enjeu stratégique clair : <b>poursuivre la spécialisation Consumer</b> ou 
+                <b>diversifier</b> vers des segments à plus forte valeur ajoutée.
             </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Segments
-    df_segments = pd.DataFrame(clients_data['segments'])
-    fig_segments = go.Figure()
-    fig_segments.add_trace(go.Bar(name='CA', x=df_segments['segment'], y=df_segments['ca'], marker_color='#3498db'))
-    fig_segments.add_trace(go.Bar(name='Profit', x=df_segments['segment'], y=df_segments['profit'], marker_color='#2ecc71'))
-    fig_segments.update_layout(title="CA et Profit par Segment", barmode='group', height=350)
-    st.plotly_chart(fig_segments, use_container_width=True)
-
-    st.markdown(
-        """
-        <div class="info-card">
-            <div class="info-title">Data Storytelling</div>
-            Le segment <b>Consumer</b> domine largement le chiffre d’affaires (> <b>1,2 M€</b>), loin devant les 
-            segments Corporate et Home Office.
-            Cependant, les écarts de <b>marge</b> suggèrent que ces segments plus modestes pourraient offrir 
-            une <b>rentabilité ou une stabilité supérieure</b>.
-            Cette structure pose un enjeu stratégique clair : <b>poursuivre la spécialisation Consumer</b> ou 
-            <b>diversifier</b> vers des segments à plus forte valeur ajoutée.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+            """,
+            unsafe_allow_html=True
+        )
 
     # --- SEGMENTATION RFM ---
     with client_tab2:
