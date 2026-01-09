@@ -197,20 +197,33 @@ st.divider()
 
 # === TABS PRINCIPAUX ===
 st.header("📈 Analyses Détaillées")
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏆 Produits", "📦 Catégories", "📅 Temporel", "🌍 Géographique", "👥 Clients"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "🎯 PRIORITÉS STRATÉGIQUES",
+    "📦 PERFORMANCE PRODUITS & CATÉGORIES",
+    "📅 ÉVOLUTION TEMPORELLE",
+    "🌍 GÉOGRAPHIE",
+    "👥 CLIENTS"
+])
 
 # =============================================
-# TAB 1 : PRODUITS AVANCÉS
+# TAB 1 : PRIORITÉS STRATÉGIQUES
 # =============================================
 with tab1:
-    st.subheader("🎯 Analyse Stratégique des Produits")
-    
-    # Sous-tabs pour les différentes analyses produits
-    prod_tab1, prod_tab2, prod_tab3 = st.tabs(["📊 Matrice BCG", "⚠️ Produits Faible Marge", "🏆 Top Produits"])
-    
-    # --- MATRICE BCG ---
-    with prod_tab1:
-        st.markdown("### 📊 Matrice BCG (Boston Consulting Group)")
+    st.markdown("### 🎯 Priorités Stratégiques")
+    st.markdown("*Analyses stratégiques : Matrices BCG et Performance, Produits à faible marge*")
+    st.divider()
+
+    # Sous-tabs pour analyses stratégiques
+    strat_tab1, strat_tab2, strat_tab3, strat_tab4 = st.tabs([
+        "📊 Matrice BCG",
+        "🎯 Matrice Performance",
+        "⚠️ Produits Faible Marge",
+        "📊 Waterfall Profit"
+    ])
+
+    # --- MATRICE BCG (déplacé depuis ancien Tab1 Produits) ---
+    with strat_tab1:
+        st.markdown("#### 📊 Matrice BCG (Boston Consulting Group)")
         st.markdown("""
         **Interprétation des quadrants :**
         - ⭐ **Étoiles** : Part de marché élevée + Croissance forte → Investir
@@ -305,9 +318,95 @@ with tab1:
                 )
         else:
             st.warning("⚠️ Pas assez de données historiques pour la matrice BCG")
-    
-    # --- PRODUITS FAIBLE MARGE ---
-    with prod_tab2:
+
+    # --- MATRICE PERFORMANCE CATÉGORIES (déplacé depuis ancien Tab2) ---
+    with strat_tab2:
+        st.markdown("#### 🎯 Matrice Performance/Marge")
+        st.markdown("""
+        **Quadrants stratégiques :**
+        - 🌟 **Q1 - Priorité** : CA élevé + Marge élevée → Investir et développer
+        - ⚙️ **Q2 - À optimiser** : CA élevé + Marge faible → Réduire les coûts
+        - 📈 **Q3 - À développer** : CA faible + Marge élevée → Augmenter visibilité
+        - ❌ **Q4 - À abandonner** : CA faible + Marge faible → Réduire ou arrêter
+        """)
+
+        matrix_data = appeler_api("/kpi/categories/matrix")
+        df_matrix = pd.DataFrame(matrix_data['data'])
+
+        # Répartition
+        rep = matrix_data['repartition']
+        col_q1, col_q2, col_q3, col_q4 = st.columns(4)
+        with col_q1:
+            st.markdown(f"""<div class="quadrant-box quadrant-q1">
+                <h4>🌟 Priorité</h4><h2>{rep['Q1_priorite']}</h2>
+            </div>""", unsafe_allow_html=True)
+        with col_q2:
+            st.markdown(f"""<div class="quadrant-box quadrant-q2">
+                <h4>⚙️ À optimiser</h4><h2>{rep['Q2_optimiser']}</h2>
+            </div>""", unsafe_allow_html=True)
+        with col_q3:
+            st.markdown(f"""<div class="quadrant-box quadrant-q3">
+                <h4>📈 À développer</h4><h2>{rep['Q3_developper']}</h2>
+            </div>""", unsafe_allow_html=True)
+        with col_q4:
+            st.markdown(f"""<div class="quadrant-box quadrant-q4">
+                <h4>❌ À abandonner</h4><h2>{rep['Q4_abandonner']}</h2>
+            </div>""", unsafe_allow_html=True)
+
+        # Graphique scatter
+        color_map_matrix = {
+            "Q1 - Priorité 🌟": "#28a745",
+            "Q2 - À optimiser ⚙️": "#ffc107",
+            "Q3 - À développer 📈": "#007bff",
+            "Q4 - À abandonner ❌": "#dc3545"
+        }
+
+        # Use absolute value of profit for size (scatter size must be non-negative)
+        df_matrix['profit_abs'] = df_matrix['profit'].abs()
+
+        fig_matrix = px.scatter(
+            df_matrix,
+            x='ca',
+            y='marge_pct',
+            size='profit_abs',
+            color='quadrant',
+            hover_name='sous_categorie',
+            hover_data={
+                'categorie': True,
+                'ca': ':.2f',
+                'marge_pct': ':.2f',
+                'profit': ':.2f',
+                'action_recommandee': True
+            },
+            color_discrete_map=color_map_matrix,
+            title="Matrice Performance/Marge par Sous-catégorie",
+            labels={'ca': 'Chiffre d\'affaires (€)', 'marge_pct': 'Marge (%)'},
+            height=550
+        )
+
+        # Lignes de seuil
+        fig_matrix.add_hline(y=matrix_data['seuils']['marge_median'], line_dash="dash", line_color="gray")
+        fig_matrix.add_vline(x=matrix_data['seuils']['ca_median'], line_dash="dash", line_color="gray")
+
+        st.plotly_chart(fig_matrix, use_container_width=True)
+
+        # Tableau avec actions
+        with st.expander("📋 Plan d'action par sous-catégorie"):
+            st.dataframe(
+                df_matrix[['categorie', 'sous_categorie', 'ca', 'marge_pct', 'quadrant', 'action_recommandee']].rename(columns={
+                    'categorie': 'Catégorie',
+                    'sous_categorie': 'Sous-catégorie',
+                    'ca': 'CA (€)',
+                    'marge_pct': 'Marge (%)',
+                    'quadrant': 'Quadrant',
+                    'action_recommandee': 'Action'
+                }),
+                use_container_width=True,
+                hide_index=True
+            )
+
+    # --- PRODUITS FAIBLE MARGE (déplacé depuis ancien Tab1) ---
+    with strat_tab3:
         st.markdown("### ⚠️ Produits à Faible Marge")
         st.markdown("*Produits qui génèrent du CA mais peu de profit - À optimiser ou abandonner*")
         
@@ -387,49 +486,9 @@ with tab1:
                     use_container_width=True,
                     hide_index=True
                 )
-    
-    # --- TOP PRODUITS CLASSIQUE ---
-    with prod_tab3:
-        st.markdown("### 🏆 Top Produits")
-        
-        col_tri, col_nb = st.columns([3, 1])
-        with col_tri:
-            critere_tri = st.radio(
-                "Trier par",
-                options=['ca', 'profit', 'quantite'],
-                format_func=lambda x: {'ca': '💰 CA', 'profit': '💵 Profit', 'quantite': '📦 Quantité'}[x],
-                horizontal=True
-            )
-        with col_nb:
-            nb_produits = st.number_input("Afficher", min_value=5, max_value=50, value=10, step=5)
-        
-        top_produits = appeler_api("/kpi/produits/top", params={'limite': nb_produits, 'tri_par': critere_tri})
-        df_produits = pd.DataFrame(top_produits)
-        
-        fig_produits = px.bar(
-            df_produits,
-            x=critere_tri,
-            y='produit',
-            color='categorie',
-            orientation='h',
-            title=f"Top {nb_produits} Produits",
-            labels={'ca': 'CA (€)', 'profit': 'Profit (€)', 'quantite': 'Quantité', 'produit': 'Produit'},
-            color_discrete_sequence=px.colors.qualitative.Set2,
-            height=500
-        )
-        fig_produits.update_layout(yaxis={'categoryorder':'total ascending'})
-        st.plotly_chart(fig_produits, use_container_width=True)
 
-# =============================================
-# TAB 2 : CATÉGORIES AVANCÉES
-# =============================================
-with tab2:
-    st.subheader("📦 Analyse Stratégique des Catégories")
-    
-    cat_tab1, cat_tab2, cat_tab3 = st.tabs(["📊 Waterfall Profit", "🎯 Matrice Performance", "📈 Vue Standard"])
-    
-    # --- WATERFALL ---
-    with cat_tab1:
+    # --- WATERFALL PROFIT (déplacé depuis ancien Tab2 Catégories) ---
+    with strat_tab4:
         st.markdown("### 📊 Cascade de Contribution au Profit")
         st.markdown("*Visualisation de la contribution de chaque catégorie et sous-catégorie au profit total*")
         
@@ -491,95 +550,51 @@ with tab2:
                 use_container_width=True,
                 hide_index=True
             )
-    
-    # --- MATRICE PERFORMANCE/MARGE ---
-    with cat_tab2:
-        st.markdown("### 🎯 Matrice Performance/Marge")
-        st.markdown("""
-        **Quadrants stratégiques :**
-        - 🌟 **Q1 - Priorité** : CA élevé + Marge élevée → Investir et développer
-        - ⚙️ **Q2 - À optimiser** : CA élevé + Marge faible → Réduire les coûts
-        - 📈 **Q3 - À développer** : CA faible + Marge élevée → Augmenter visibilité
-        - ❌ **Q4 - À abandonner** : CA faible + Marge faible → Réduire ou arrêter
-        """)
-        
-        matrix_data = appeler_api("/kpi/categories/matrix")
-        df_matrix = pd.DataFrame(matrix_data['data'])
-        
-        # Répartition
-        rep = matrix_data['repartition']
-        col_q1, col_q2, col_q3, col_q4 = st.columns(4)
-        with col_q1:
-            st.markdown(f"""<div class="quadrant-box quadrant-q1">
-                <h4>🌟 Priorité</h4><h2>{rep['Q1_priorite']}</h2>
-            </div>""", unsafe_allow_html=True)
-        with col_q2:
-            st.markdown(f"""<div class="quadrant-box quadrant-q2">
-                <h4>⚙️ À optimiser</h4><h2>{rep['Q2_optimiser']}</h2>
-            </div>""", unsafe_allow_html=True)
-        with col_q3:
-            st.markdown(f"""<div class="quadrant-box quadrant-q3">
-                <h4>📈 À développer</h4><h2>{rep['Q3_developper']}</h2>
-            </div>""", unsafe_allow_html=True)
-        with col_q4:
-            st.markdown(f"""<div class="quadrant-box quadrant-q4">
-                <h4>❌ À abandonner</h4><h2>{rep['Q4_abandonner']}</h2>
-            </div>""", unsafe_allow_html=True)
-        
-        # Graphique scatter
-        color_map_matrix = {
-            "Q1 - Priorité 🌟": "#28a745",
-            "Q2 - À optimiser ⚙️": "#ffc107",
-            "Q3 - À développer 📈": "#007bff",
-            "Q4 - À abandonner ❌": "#dc3545"
-        }
 
-        # Use absolute value of profit for size (scatter size must be non-negative)
-        df_matrix['profit_abs'] = df_matrix['profit'].abs()
+# =============================================
+# TAB 2 : PERFORMANCE PRODUITS & CATÉGORIES
+# =============================================
+with tab2:
+    st.markdown("### 📦 Performance Produits & Catégories")
+    st.markdown("*Analyses opérationnelles détaillées des produits et catégories*")
+    st.divider()
 
-        fig_matrix = px.scatter(
-            df_matrix,
-            x='ca',
-            y='marge_pct',
-            size='profit_abs',
-            color='quadrant',
-            hover_name='sous_categorie',
-            hover_data={
-                'categorie': True,
-                'ca': ':.2f',
-                'marge_pct': ':.2f',
-                'profit': ':.2f',
-                'action_recommandee': True
-            },
-            color_discrete_map=color_map_matrix,
-            title="Matrice Performance/Marge par Sous-catégorie",
-            labels={'ca': 'Chiffre d\'affaires (€)', 'marge_pct': 'Marge (%)'},
-            height=550
-        )
-        
-        # Lignes de seuil
-        fig_matrix.add_hline(y=matrix_data['seuils']['marge_median'], line_dash="dash", line_color="gray")
-        fig_matrix.add_vline(x=matrix_data['seuils']['ca_median'], line_dash="dash", line_color="gray")
-        
-        st.plotly_chart(fig_matrix, use_container_width=True)
-        
-        # Tableau avec actions
-        with st.expander("📋 Plan d'action par sous-catégorie"):
-            st.dataframe(
-                df_matrix[['categorie', 'sous_categorie', 'ca', 'marge_pct', 'quadrant', 'action_recommandee']].rename(columns={
-                    'categorie': 'Catégorie',
-                    'sous_categorie': 'Sous-catégorie',
-                    'ca': 'CA (€)',
-                    'marge_pct': 'Marge (%)',
-                    'quadrant': 'Quadrant',
-                    'action_recommandee': 'Action'
-                }),
-                use_container_width=True,
-                hide_index=True
+    perf_tab1, perf_tab2 = st.tabs(["🏆 Top Produits", "📊 Vue Catégories"])
+
+    # --- TOP PRODUITS ---
+    with perf_tab1:
+        st.markdown("#### 🏆 Top Produits")
+
+        col_tri, col_nb = st.columns([3, 1])
+        with col_tri:
+            critere_tri = st.radio(
+                "Trier par",
+                options=['ca', 'profit', 'quantite'],
+                format_func=lambda x: {'ca': '💰 CA', 'profit': '💵 Profit', 'quantite': '📦 Quantité'}[x],
+                horizontal=True
             )
-    
-    # --- VUE STANDARD ---
-    with cat_tab3:
+        with col_nb:
+            nb_produits = st.number_input("Afficher", min_value=5, max_value=50, value=10, step=5)
+
+        top_produits = appeler_api("/kpi/produits/top", params={'limite': nb_produits, 'tri_par': critere_tri})
+        df_produits = pd.DataFrame(top_produits)
+
+        fig_produits = px.bar(
+            df_produits,
+            x=critere_tri,
+            y='produit',
+            color='categorie',
+            orientation='h',
+            title=f"Top {nb_produits} Produits",
+            labels={'ca': 'CA (€)', 'profit': 'Profit (€)', 'quantite': 'Quantité', 'produit': 'Produit'},
+            color_discrete_sequence=px.colors.qualitative.Set2,
+            height=500
+        )
+        fig_produits.update_layout(yaxis={'categoryorder':'total ascending'})
+        st.plotly_chart(fig_produits, use_container_width=True)
+
+    # --- VUE CATÉGORIES ---
+    with perf_tab2:
         categories = appeler_api("/kpi/categories")
         df_cat = pd.DataFrame(categories)
         
@@ -599,18 +614,24 @@ with tab2:
             st.plotly_chart(fig_marge, use_container_width=True)
 
 # =============================================
-# TAB 3 : TEMPOREL AVANCÉ
+# TAB 3 : ÉVOLUTION TEMPORELLE
 # =============================================
 with tab3:
-    st.subheader("📅 Analyse Temporelle Avancée")
+    st.markdown("### 📅 Évolution Temporelle")
+    st.markdown("*Analyses temporelles consolidées : tendances, moyennes mobiles et comparaisons*")
+    st.divider()
 
-    temp_tab1, temp_tab2, temp_tab3 = st.tabs(["📊 Évolutions Classiques", "📈 Tendances & Moyenne Mobile", "🔄 Comparaison N/N-1"])
+    # Sous-onglets pour la section temporelle
+    temp_tab1, temp_tab2, temp_tab3 = st.tabs([
+        "📈 Évolution du CA et Profit",
+        "📊 Indicateurs clés par période",
+        "📉 Variations annuelles"
+    ])
 
-    # --- ÉVOLUTIONS CLASSIQUES (CA, PROFIT, COMMANDES) ---
+    # --- SOUS-ONGLET 1 : ÉVOLUTION CA ET PROFIT ---
     with temp_tab1:
-        st.markdown("### 📊 Évolution du CA, Profit et Commandes")
+        st.markdown("#### 📊 Évolution du CA, Profit et Commandes")
 
-        # Sélecteur de granularité
         granularite = st.radio(
             "Période d'analyse",
             options=['jour', 'mois', 'annee'],
@@ -671,6 +692,14 @@ with tab3:
 
         st.plotly_chart(fig_temporal, use_container_width=True)
 
+    # --- SOUS-ONGLET 2 : INDICATEURS CLÉS PAR PÉRIODE ---
+    with temp_tab2:
+        st.markdown("#### 📊 Statistiques et Tendances par Période")
+
+        # Utiliser les données déjà chargées
+        temporal = appeler_api("/kpi/temporel", params={'periode': 'mois'})
+        df_temporal = pd.DataFrame(temporal)
+
         # Statistiques temporelles
         col_stats1, col_stats2, col_stats3 = st.columns(3)
         with col_stats1:
@@ -681,13 +710,11 @@ with tab3:
             meilleure_periode = df_temporal.loc[df_temporal['ca'].idxmax()]
             st.metric("🏆 Meilleure période", meilleure_periode['periode'])
 
-    # --- ÉVOLUTION AVEC MOYENNE MOBILE ---
-    with temp_tab2:
-        st.markdown("### 📈 Évolution avec Moyenne Mobile")
-        
+        st.divider()
+
         temporal_avance = appeler_api("/kpi/temporel/avance")
         df_temp = pd.DataFrame(temporal_avance['data'])
-        
+
         # Statistiques
         stats_temp = temporal_avance['statistiques']
         col_t1, col_t2, col_t3, col_t4 = st.columns(4)
@@ -699,10 +726,15 @@ with tab3:
             st.metric("Meilleur mois", stats_temp['meilleur_mois'])
         with col_t4:
             st.metric("Pire mois", stats_temp['pire_mois'])
-        
+
+        st.divider()
+
+        # Moyenne Mobile
+        st.markdown("#### 📈 Moyenne Mobile")
+
         # Graphique avec moyenne mobile
         fig_mm = go.Figure()
-        
+
         fig_mm.add_trace(go.Scatter(
             x=df_temp['periode'],
             y=df_temp['ca'],
@@ -712,7 +744,7 @@ with tab3:
             fill='tozeroy',
             fillcolor='rgba(52, 152, 219, 0.2)'
         ))
-        
+
         fig_mm.add_trace(go.Scatter(
             x=df_temp['periode'],
             y=df_temp['ca_mm3'],
@@ -720,56 +752,29 @@ with tab3:
             name='Moyenne mobile 3 mois',
             line=dict(color='#e74c3c', width=3, dash='solid')
         ))
-        
+
         fig_mm.update_layout(
-            title="CA Mensuel avec Moyenne Mobile (3 mois)",
+            title="CA avec Moyenne Mobile (3 mois)",
             xaxis_title="Période",
             yaxis_title="CA (€)",
             height=450,
             hovermode='x unified'
         )
-        
+
         st.plotly_chart(fig_mm, use_container_width=True)
-    
-    # --- COMPARAISON N/N-1 ---
+
+    # --- SOUS-ONGLET 3 : VARIATIONS ANNUELLES ---
     with temp_tab3:
-        st.markdown("### 🔄 Comparaison Année N vs N-1")
-        
+        st.markdown("#### 📉 Comparaison N/N-1 (Year-over-Year)")
+
+        temporal_avance = appeler_api("/kpi/temporel/avance")
         df_comp = pd.DataFrame(temporal_avance['data'])
-        
+
         # Filtrer les données avec N-1 disponible
         df_comp_valid = df_comp[df_comp['ca_n1'].notna()].copy()
-        
+
         if len(df_comp_valid) > 0:
-            fig_comp = go.Figure()
-            
-            # Année N
-            fig_comp.add_trace(go.Bar(
-                x=df_comp_valid['periode'],
-                y=df_comp_valid['ca'],
-                name='Année N',
-                marker_color='#3498db'
-            ))
-            
-            # Année N-1 (en transparence)
-            fig_comp.add_trace(go.Bar(
-                x=df_comp_valid['periode'],
-                y=df_comp_valid['ca_n1'],
-                name='Année N-1',
-                marker_color='rgba(52, 152, 219, 0.3)'
-            ))
-            
-            fig_comp.update_layout(
-                title="Comparaison CA : Année N vs N-1",
-                barmode='overlay',
-                xaxis_title="Période",
-                yaxis_title="CA (€)",
-                height=450
-            )
-            
-            st.plotly_chart(fig_comp, use_container_width=True)
-            
-            # Variation YoY
+            # Variation YoY simplifiée
             fig_yoy = px.bar(
                 df_comp_valid,
                 x='periode',
@@ -779,31 +784,44 @@ with tab3:
                 color_continuous_midpoint=0,
                 title="Variation Year-over-Year (%)",
                 labels={'variation_yoy': 'Variation YoY (%)'},
-                height=350
+                height=500
             )
-            
+
             st.plotly_chart(fig_yoy, use_container_width=True)
+
+            # Tableau détaillé des variations
+            with st.expander("📋 Tableau détaillé des variations"):
+                st.dataframe(
+                    df_comp_valid[['periode', 'ca', 'ca_n1', 'variation_yoy']].rename(columns={
+                        'periode': 'Période',
+                        'ca': 'CA Année N (€)',
+                        'ca_n1': 'CA Année N-1 (€)',
+                        'variation_yoy': 'Variation (%)'
+                    }),
+                    use_container_width=True,
+                    hide_index=True
+                )
         else:
             st.warning("⚠️ Pas assez de données pour la comparaison N/N-1")
 
 # =============================================
-# TAB 4 : GÉOGRAPHIQUE AVANCÉ
+# TAB 4 : GÉOGRAPHIE
 # =============================================
 with tab4:
-    st.subheader("🌍 Analyse Géographique Avancée")
-    
+    st.markdown("### 🌍 Analyse Géographique")
+    st.markdown("*Analyses spatiales : performance par région, état et ville*")
+    st.divider()
+
     geo_tab1, geo_tab2, geo_tab3 = st.tabs(["🗺️ Performance États", "🏙️ Top Villes", "📊 Vue Régions"])
-    
+
     # --- PERFORMANCE PAR ÉTAT ---
     with geo_tab1:
-        st.markdown("### 🗺️ Performance par État (Heatmap)")
-        
+        st.markdown("**Performance par État (Heatmap)**")
+
         etats_data = appeler_api("/kpi/geographique/etats")
         df_etats = pd.DataFrame(etats_data['data'])
-        
+
         # Heatmap des états par marge
-        st.markdown("#### Carte thermique : Marge par État")
-        
         fig_heatmap_etats = px.treemap(
             df_etats,
             path=['region', 'etat'],
@@ -815,7 +833,7 @@ with tab4:
             hover_data=['profit', 'nb_clients', 'ca_par_client'],
             height=600
         )
-        
+
         st.plotly_chart(fig_heatmap_etats, use_container_width=True)
 
         # Tableau complet
@@ -834,14 +852,14 @@ with tab4:
                 use_container_width=True,
                 hide_index=True
             )
-    
+
     # --- TOP VILLES ---
     with geo_tab2:
-        st.markdown("### 🏙️ Top Villes Performantes")
-        
+        st.markdown("**Top Villes Performantes**")
+
         nb_villes = st.slider("Nombre de villes", 10, 50, 20)
         villes_data = appeler_api("/kpi/geographique/villes", params={'limite': nb_villes})
-        
+
         # Stats
         stats_villes = villes_data['statistiques']
         col_v1, col_v2, col_v3 = st.columns(3)
@@ -851,11 +869,10 @@ with tab4:
             st.metric("CA moyen/ville", formater_euro(stats_villes['ca_moyen_ville']))
         with col_v3:
             st.metric("Clients moy/ville", f"{stats_villes['clients_moyen_ville']:.1f}")
-        
+
         # Top CA
-        st.markdown("#### 💰 Top Villes par CA")
         df_villes_ca = pd.DataFrame(villes_data['top_ca'])
-        
+
         fig_villes = px.bar(
             df_villes_ca.head(15),
             x='ca',
@@ -873,9 +890,9 @@ with tab4:
     with geo_tab3:
         geo = appeler_api("/kpi/geographique")
         df_geo = pd.DataFrame(geo)
-        
+
         col_geo1, col_geo2 = st.columns(2)
-        
+
         with col_geo1:
             fig_geo_ca = px.bar(
                 df_geo, x='region', y='ca',
@@ -885,7 +902,7 @@ with tab4:
             )
             fig_geo_ca.update_traces(texttemplate='%{text:,.0f}€', textposition='outside')
             st.plotly_chart(fig_geo_ca, use_container_width=True)
-        
+
         with col_geo2:
             fig_geo_clients = px.pie(
                 df_geo, values='nb_clients', names='region',
@@ -900,7 +917,9 @@ with tab4:
 # TAB 5 : CLIENTS
 # =============================================
 with tab5:
-    st.subheader("👥 Analyse Clients")
+    st.markdown("### 👥 Analyse Clients")
+    st.markdown("*Comportement client, fidélisation et segmentation*")
+    st.divider()
 
     clients_data = appeler_api("/kpi/clients", params={'limite': 10})
 
@@ -935,10 +954,9 @@ with tab5:
 st.divider()
 
 # === FOOTER ===
-st.divider()
 st.markdown("""
 <div style='text-align: center; color: #7f8c8d;'>
     <p>📊 <b>Superstore BI Dashboard - Advanced Analytics</b> | FastAPI + Streamlit + Plotly</p>
-    <p>🎯 Matrices BCG, Waterfall, Saisonnalité, Analyses géographiques avancées</p>
+    <p>🎯 Réorganisation Phase 1 : Structure optimisée pour une meilleure UX</p>
 </div>
 """, unsafe_allow_html=True)
