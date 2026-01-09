@@ -42,8 +42,8 @@ st.markdown("""
     }
     
     h1 { color: #2c3e50; font-weight: 700; }
-    h2 { color: #34495e; font-weight: 600; }
-    h3 { color: #5a6c7d; font-weight: 500; }
+    h2 { color: #34495e; font-weight: 600; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+    h3 { color: #5a6c7d; font-weight: 500; margin-top: 0.3rem; margin-bottom: 0.3rem; }
     
     .quadrant-box {
         padding: 10px;
@@ -56,6 +56,23 @@ st.markdown("""
     .quadrant-q2 { background-color: #fff3cd; border: 2px solid #ffc107; }
     .quadrant-q3 { background-color: #cce5ff; border: 2px solid #007bff; }
     .quadrant-q4 { background-color: #f8d7da; border: 2px solid #dc3545; }
+            
+    .info-card {
+        background-color: #e8eef3;
+        padding: 18px;
+        border-radius: 10px;
+        color: #2c3e50;
+        border-left: 6px solid #5a7a92;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .info-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #3d5a6d;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -167,8 +184,6 @@ with col2:
 with col3:
     st.metric("📈 Marge Moyenne", formater_pourcentage(kpi_data['marge_moyenne']))
 
-st.markdown("---")
-
 # Niveau 2 : Volume d'Activité (KPI's Opérationnels)
 st.subheader("📊 Volume d'Activité")
 col4, col5, col6 = st.columns(3)
@@ -178,8 +193,6 @@ with col5:
     st.metric("📦 Quantité Vendue", formater_nombre(kpi_data['quantite_vendue']))
 with col6:
     st.metric("👥 Clients Uniques", formater_nombre(kpi_data['nb_clients']))
-
-st.markdown("---")
 
 # Niveau 3 : Indicateurs d'Efficacité (Ratios)
 st.subheader("💎 Indicateurs d'Efficacité")
@@ -193,6 +206,22 @@ with col9:
     ca_par_client = kpi_data['ca_total'] / kpi_data['nb_clients'] if kpi_data['nb_clients'] > 0 else 0
     st.metric("💎 CA/Client", formater_euro(ca_par_client))
 
+st.markdown(
+    """
+    <div class="info-card">
+        <div class="info-title">Data Storytelling</div>
+        <p>L'entreprise affiche une santé financière solide avec un chiffre d'affaires de 
+        <b>2,3 millions d'euros</b> généré par <b>5 009 commandes</b> auprès de 
+        <b>793 clients</b>, représentant <b>37 873 articles vendus</b>.</p>
+        <p>La <b>marge moyenne de 12,47%</b> et un <b>profit total de 286 397€</b> démontrent 
+        une gestion efficace des coûts. Le <b>panier moyen de 458,61€</b> confirme une 
+        clientèle <b>B2B</b> plutôt que grand public, tandis que la moyenne de 7,56 articles 
+        par commande indique des achats groupés significatifs, typiques d'entreprises s'équipant 
+        en fournitures ou matériel.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 st.divider()
 
 # === TABS PRINCIPAUX ===
@@ -214,11 +243,10 @@ with tab1:
     st.divider()
 
     # Sous-tabs pour analyses stratégiques
-    strat_tab1, strat_tab2, strat_tab3, strat_tab4 = st.tabs([
+    strat_tab1, strat_tab2, strat_tab3 = st.tabs([
         "📊 Matrice BCG",
         "🎯 Matrice Performance",
-        "⚠️ Produits Faible Marge",
-        "📊 Waterfall Profit"
+        "⚠️ Produits Faible Marge"
     ])
 
     # --- MATRICE BCG (déplacé depuis ancien Tab1 Produits) ---
@@ -319,6 +347,22 @@ with tab1:
         else:
             st.warning("⚠️ Pas assez de données historiques pour la matrice BCG")
 
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                Cette matrice BCG révèle un <b>portefeuille déséquilibré avec 60 produits "Dilemmes"</b> (faible part de 
+                marché, forte croissance) nécessitant des décisions stratégiques urgentes, contre seulement <b>20 "Étoiles"</b>
+                à développer et <b>3 "Vaches à lait" à rentabiliser</b>. Les <b>17 "Poids morts"</b> devraient être abandonnés 
+                rapidement. 
+                La concentration de produits dans le quadrant "Dilemmes" indique une dispersion des efforts sur <b>trop de 
+                références non rentables</b>, obligeant l'entreprise à choisir lesquelles méritent l'investissement pour 
+                devenir des "Étoiles" et lesquelles éliminer pour libérer des ressources.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # --- MATRICE PERFORMANCE CATÉGORIES (déplacé depuis ancien Tab2) ---
     with strat_tab2:
         st.markdown("#### 🎯 Matrice Performance/Marge")
@@ -404,6 +448,23 @@ with tab1:
                 use_container_width=True,
                 hide_index=True
             )
+        
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                L'analyse performance/marge segmente le catalogue en <b>4 priorités stratégiques</b> : <b>3 produits 
+                "Priorité</b> (CA élevé + marge élevée) à protéger absolument, <b>6 produits "À optimiser"</b> (CA élevé mais 
+                marge faible) nécessitant 
+                une renégociation des coûts, <b>6 produits</b> "À développer" (faible CA mais forte marge) offrant un potentiel 
+                de croissance, et <b>2 produits "À abandonner"</b>. Cette répartition équilibrée entre optimisation et 
+                développement 
+                suggère qu'avec les bonnes actions correctives sur les 6 produits à optimiser, l'entreprise pourrait 
+                significativement améliorer sa rentabilité globale sans compromettre le volume.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     # --- PRODUITS FAIBLE MARGE (déplacé depuis ancien Tab1) ---
     with strat_tab3:
@@ -486,70 +547,23 @@ with tab1:
                     use_container_width=True,
                     hide_index=True
                 )
-
-    # --- WATERFALL PROFIT (déplacé depuis ancien Tab2 Catégories) ---
-    with strat_tab4:
-        st.markdown("### 📊 Cascade de Contribution au Profit")
-        st.markdown("*Visualisation de la contribution de chaque catégorie et sous-catégorie au profit total*")
         
-        waterfall_data = appeler_api("/kpi/categories/waterfall")
-        
-        # Graphique Waterfall par catégorie
-        df_wf = pd.DataFrame(waterfall_data['waterfall'])
-        
-        fig_waterfall = go.Figure(go.Waterfall(
-            name="Profit",
-            orientation="v",
-            measure=["relative"] * len(df_wf) + ["total"],
-            x=list(df_wf['label']) + ["Total"],
-            y=list(df_wf['value']) + [waterfall_data['profit_total']],
-            textposition="outside",
-            text=[f"{v:,.0f}€" for v in df_wf['value']] + [f"{waterfall_data['profit_total']:,.0f}€"],
-            connector={"line": {"color": "rgb(63, 63, 63)"}},
-            increasing={"marker": {"color": "#28a745"}},
-            decreasing={"marker": {"color": "#dc3545"}},
-            totals={"marker": {"color": "#007bff"}}
-        ))
-        
-        fig_waterfall.update_layout(
-            title="Contribution au Profit par Catégorie",
-            height=450,
-            showlegend=False
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                <b>20 produits</b> génèrent à peine du profit avec un seuil de marge <b>sous 5%</b>, représentant <b>259 015€ 
+                de CA</b> (11,28% du 
+                total) mais détruisant de la valeur avec <b>15 références en perte réelle</b>. Le Cable Lock Keyed et plusieurs 
+                systèmes de reliure affichent des marges négatives catastrophiques (<b>jusqu'à -80%</b>), transformant du 
+                chiffre 
+                d'affaires en pertes. Cette situation critique exige une action immédiate : augmenter les prix de <b>10-15%</b> 
+                sur ces références, renégocier les conditions d'achat, ou supprimer ces produits toxiques qui drainent la 
+                rentabilité globale de l'entreprise.
+            </div>
+            """,
+            unsafe_allow_html=True
         )
-        
-        st.plotly_chart(fig_waterfall, use_container_width=True)
-        
-        # Détail par sous-catégorie
-        st.markdown("#### Détail par Sous-catégorie")
-        df_subcat = pd.DataFrame(waterfall_data['detail_sous_categories'])
-        
-        fig_subcat = px.bar(
-            df_subcat.sort_values('profit', ascending=True),
-            x='profit',
-            y='sous_categorie',
-            color='categorie',
-            orientation='h',
-            title="Profit par Sous-catégorie",
-            labels={'profit': 'Profit (€)', 'sous_categorie': 'Sous-catégorie'},
-            color_discrete_sequence=px.colors.qualitative.Set2,
-            height=600
-        )
-        
-        st.plotly_chart(fig_subcat, use_container_width=True)
-        
-        with st.expander("📋 Tableau détaillé"):
-            st.dataframe(
-                df_subcat[['categorie', 'sous_categorie', 'ca', 'profit', 'marge_pct', 'contribution_pct']].rename(columns={
-                    'categorie': 'Catégorie',
-                    'sous_categorie': 'Sous-catégorie',
-                    'ca': 'CA (€)',
-                    'profit': 'Profit (€)',
-                    'marge_pct': 'Marge (%)',
-                    'contribution_pct': 'Contribution (%)'
-                }).sort_values('Profit (€)', ascending=False),
-                use_container_width=True,
-                hide_index=True
-            )
 
 # =============================================
 # TAB 2 : PERFORMANCE PRODUITS & CATÉGORIES
@@ -593,6 +607,31 @@ with tab2:
         fig_produits.update_layout(yaxis={'categoryorder':'total ascending'})
         st.plotly_chart(fig_produits, use_container_width=True)
 
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                <b>1. Top 10 Produits par Chiffre d’Affaires</b><br>
+                Le <b>Canon imageCLASS 2200</b> domine largement le chiffre d’affaires (> 60 000€, soit presque 3x
+                plus que le deuxième produit), révélant une <b>forte dépendance à quelques références technologiques</b>, 
+                notamment des copieurs et systèmes de reliure. 
+                Cette concentration souligne le positionnement B2B de l’entreprise, mais suggère aussi un <b>risque de 
+                dépendance</b> et une opportunité de <b>diversification des produits vedettes</b>. <br><br>
+                <b>2. Top 10 Produits par Profit</b><br>
+                Si le Canon imageCLASS reste le plus rentable (~25 000€), son avance est plus modérée, indiquant 
+                une <b>marge plus serrée</b>. À l’inverse, le <b>Fellowes PB500</b> se distingue par un excellent 
+                ratio profit / chiffre d’affaires, montrant que <b>volume et rentabilité ne coïncident pas 
+                toujours</b> et qu’un arbitrage stratégique est nécessaire. <br><br>
+                <b>3. Top 10 Produits par Quantité</b><br>
+                Les <b>consommables bureautiques</b> (papier, enveloppes, agrafes) dominent les volumes, mais ont 
+                un <b>faible impact sur le chiffre d’affaires</b>. Cette structure révèle un <b>modèle à deux 
+                vitesses</b> : les consommables génèrent récurrence et fidélisation, tandis que les équipements 
+                technologiques portent la rentabilité.
+                </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # --- VUE CATÉGORIES ---
     with perf_tab2:
         categories = appeler_api("/kpi/categories")
@@ -612,6 +651,23 @@ with tab2:
                               color='marge_pct', color_continuous_scale='Viridis', text='marge_pct', height=400)
             fig_marge.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
             st.plotly_chart(fig_marge, use_container_width=True)
+
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                La catégorie <b>Technology</b> domine avec <b>836 000€ de CA</b> et <b>145 000€ de profit</b> 
+                (marge <b>17,4%</b>).
+                Les <b>Office Supplies</b> suivent avec un CA similaire mais marge comparable, tandis que 
+                <b>Furniture</b>, malgré un CA correct, affiche une marge très faible (<b>2,5%</b>), détruisant 
+                presque la rentabilité.
+                La vraie valeur se situe donc dans <b>Technology et Office Supplies</b>.
+                L’entreprise devrait <b>repenser sa stratégie Furniture</b> : augmenter les prix, réduire les coûts 
+                ou envisager un abandon.
+                </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 # =============================================
 # TAB 3 : ÉVOLUTION TEMPORELLE
@@ -692,6 +748,28 @@ with tab3:
 
         st.plotly_chart(fig_temporal, use_container_width=True)
 
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                <b>1. Évolution Temporelle par jour</b><br>
+                La vue quotidienne montre une <b>forte volatilité</b> avec des pics jusqu’à <b>30 000€</b> certains jours et de
+                longues périodes quasi-nulles. Les gros CA ponctuels proviennent probablement de <b>grosses commandes B2B</b>, 
+                posant un défi de <b>trésorerie et de planification</b>. <br><br>
+                <b>2. Évolution Temporelle par mois</b><br>
+                L’agrégation mensuelle lisse la volatilité et révèle une <b>tendance haussière</b> de 2015 à 2018 : le CA moyen 
+                passe de <b>40 000€</b> à plus de <b>100 000€</b>. Les commandes suivent une progression régulière, confirmant 
+                une <b>croissance soutenue</b> sur 4 ans, avec accélération notable depuis mi-2017. <br><br>
+                <b>3. Évolution Temporelle par année</b><br>
+                La vue annuelle confirme une <b>croissance solide</b> : le CA progresse de <b>470 000€</b> à <b>700 000€</b> 
+                entre 2015 et 2018, et les commandes de 1 000 à 1 600+. L’ascension constante démontre la <b>solidité du modèle</b>
+                et l’efficacité opérationnelle, avec 2018 comme année record. La question stratégique : <b>comment dépasser le 
+                million d’euros</b> ?
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # --- SOUS-ONGLET 2 : INDICATEURS CLÉS PAR PÉRIODE ---
     with temp_tab2:
         st.markdown("#### 📊 Statistiques et Tendances par Période")
@@ -763,6 +841,22 @@ with tab3:
 
         st.plotly_chart(fig_mm, use_container_width=True)
 
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                Le CA moyen mensuel atteint <b>47 858€</b> avec <b>104 commandes moyennes par mois</b>, le pic historique 
+                restant novembre 
+                2018. La croissance moyenne de <b>40,7%</b> démontre une dynamique exceptionnelle, bien que le pire mois 
+                (février 
+                2015) contraste fortement avec cette tendance. La moyenne mobile sur 3 mois lisse la volatilité et révèle une 
+                accélération constante de fin 2017 à fin 2018, où la courbe rouge (tendance) converge puis dépasse 
+                ponctuellement la courbe bleue (réel), signalant un momentum positif qui devrait être capitalisé en 2019.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # --- SOUS-ONGLET 3 : VARIATIONS ANNUELLES ---
     with temp_tab3:
         st.markdown("#### 📉 Comparaison N/N-1 (Year-over-Year)")
@@ -803,6 +897,23 @@ with tab3:
                 )
         else:
             st.warning("⚠️ Pas assez de données pour la comparaison N/N-1")
+
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                L'analyse <b>Year-over-Year</b> montre une croissance volatile mais majoritairement positive : janvier 2016 
+                explose à 
+                <b>+160%</b> (effet de base faible), suivie de fluctuations entre <b>-40% et +140%</b>. À partir de 2017, la 
+                croissance se 
+                stabilise entre <b>+10% et +90%</b>, avec une tendance haussière marquée. Fin 2018 ralentit légèrement (+20-
+                50%), ce qui est normal après une forte croissance. Cette volatilité en dents de scie suggère des effets 
+                saisonniers ou des variations ponctuelles de commandes importantes, mais la tendance générale reste 
+                solidement positive sur 3 ans.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 # =============================================
 # TAB 4 : GÉOGRAPHIE
@@ -852,6 +963,21 @@ with tab4:
                 use_container_width=True,
                 hide_index=True
             )
+        
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                La heatmap révèle une performance par État très contrastée : la Californie (West) domine en <b>taille et marge</b>, 
+                tandis que Pennsylvania, Texas, Ohio et Illinois (en rouge/orange) affichent des marges négatives ou très 
+                faibles malgré des volumes importants. New York, bien que générant du CA, souffre également de <b>rentabilité</b>. 
+                Cette cartographie met en évidence un paradoxe : <b>les plus gros États ne sont pas les plus rentables</b>. 
+                L'entreprise doit investiguer les causes (prix trop bas, coûts logistiques, mix produit défavorable) et 
+                corriger rapidement la situation dans ces États stratégiques pour <b>transformer du volume en profit</b>.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     # --- TOP VILLES ---
     with geo_tab2:
@@ -886,6 +1012,22 @@ with tab4:
         fig_villes.update_layout(yaxis={'categoryorder': 'total ascending'})
         st.plotly_chart(fig_villes, use_container_width=True)
 
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                <b>604 villes</b> génèrent un CA moyen de <b>3 803€ par ville</b>, New York City dominant largement avec plus 
+                de <b>250 000€</b>, 
+                soit presque le double de Los Angeles (200 000€). Les régions East et West concentrent les plus grosses villes 
+                performantes, tandis que Central (Houston, Chicago, Detroit) et South (Jacksonville, San Antonio) ont des 
+                contributions plus modestes. Cette concentration géographique sur quelques métropoles majeures révèle un 
+                <b>potentiel inexploité</b> dans les villes moyennes : développer la présence commerciale dans les 580+ villes 
+                à faible CA pourrait doubler le chiffre d'affaires national.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # --- VUE RÉGIONS STANDARD ---
     with geo_tab3:
         geo = appeler_api("/kpi/geographique")
@@ -912,6 +1054,20 @@ with tab4:
             )
             fig_geo_clients.update_traces(textposition='inside', textinfo='percent+label')
             st.plotly_chart(fig_geo_clients, use_container_width=True)
+
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Analyse Géographique – Synthèse</div>
+                Les régions <b>West</b> et <b>East</b> dominent le chiffre d’affaires (<b>725 000€</b> et <b>679 000€</b>), 
+                représentant 55% de l’activité. La répartition des clients reste équilibrée (<b>27,4% West</b>, <b>26,9% East</b>), 
+                mais le <b>profit</b> par région montre une surperformance de West (<b>108 000€</b> vs 91 000€).
+                Les régions <b>Central</b> et <b>South</b>, avec une densité de clients similaire mais un CA inférieur, 
+                représentent un <b>potentiel de croissance</b> important si les actions commerciales sont adaptées.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 # =============================================
 # TAB 5 : CLIENTS
@@ -943,6 +1099,21 @@ with tab5:
         taux_fid = (rec['clients_recurrents'] / rec['total_clients'] * 100) if rec['total_clients'] > 0 else 0
         st.metric("Taux fidélisation", f"{taux_fid:.1f}%")
 
+    st.markdown(
+        """
+        <div class="info-card">
+            <div class="info-title">Data Storytelling</div>
+            Avec <b>98,5 % de clients récurrents</b>, l’entreprise affiche une <b>fidélisation exceptionnelle</b> et 
+            des relations commerciales régulières (<b>6,3 commandes par client</b>).
+            Le faible nombre de nouveaux clients suggère une <b>phase de maturité</b> ou un ralentissement de 
+            l’acquisition.
+            Enfin, la répartition homogène du chiffre d’affaires du <b>top 10 clients</b> indique une 
+            <b>base clients équilibrée</b>, sans dépendance excessive à un compte unique.
+            </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     # Segments
     df_segments = pd.DataFrame(clients_data['segments'])
     fig_segments = go.Figure()
@@ -950,6 +1121,21 @@ with tab5:
     fig_segments.add_trace(go.Bar(name='Profit', x=df_segments['segment'], y=df_segments['profit'], marker_color='#2ecc71'))
     fig_segments.update_layout(title="CA et Profit par Segment", barmode='group', height=350)
     st.plotly_chart(fig_segments, use_container_width=True)
+
+    st.markdown(
+        """
+        <div class="info-card">
+            <div class="info-title">Data Storytelling</div>
+            Le segment <b>Consumer</b> domine largement le chiffre d’affaires (> <b>1,2 M€</b>), loin devant les 
+            segments Corporate et Home Office.
+            Cependant, les écarts de <b>marge</b> suggèrent que ces segments plus modestes pourraient offrir 
+            une <b>rentabilité ou une stabilité supérieure</b>.
+            Cette structure pose un enjeu stratégique clair : <b>poursuivre la spécialisation Consumer</b> ou 
+            <b>diversifier</b> vers des segments à plus forte valeur ajoutée.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 st.divider()
 
