@@ -687,6 +687,13 @@ with tab2:
 
         abc_data = appeler_api("/kpi/analyse-abc", params={'niveau': niveau_abc})
 
+        # Définir le mapping de couleurs cohérent
+        COLOR_MAP_ABC = {
+            "A 🌟": "#28a745",  # Vert
+            "B 📊": "#ffc107",  # Jaune
+            "C 📉": "#dc3545"   # Rouge
+        }
+
         # Statistiques globales
         stats_abc = abc_data['statistiques']
         col_abc1, col_abc2 = st.columns(2)
@@ -708,7 +715,8 @@ with tab2:
                 values='nombre',
                 names='classe',
                 title="Répartition du Nombre d'Éléments par Classe",
-                color_discrete_sequence=['#28a745', '#ffc107', '#dc3545'],
+                color='classe',  # Utiliser color au lieu de color_discrete_sequence
+                color_discrete_map=COLOR_MAP_ABC,  # Utiliser le même mapping
                 height=350
             )
             st.plotly_chart(fig_abc_pie, use_container_width=True)
@@ -722,7 +730,7 @@ with tab2:
                 labels={'pct_ca': '% CA', 'classe': 'Classe'},
                 text='pct_ca',
                 color='classe',
-                color_discrete_map={"A 🌟": "#28a745", "B 📊": "#ffc107", "C 📉": "#dc3545"},
+                color_discrete_map=COLOR_MAP_ABC,  # Utiliser le même mapping
                 height=350
             )
             fig_abc_ca.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
@@ -747,7 +755,7 @@ with tab2:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                L'analyse ABC révèle une concentration classique de la valeur : 50,8% des produits (940 références, Classe A) génèrent 79,8% du CA, confirmant le principe de Pareto où une minorité de références porte l'essentiel des ventes. La Classe B (26,5% des produits) contribue à 15,1% du CA, offrant un équilibre volume/valeur raisonnable, tandis que 22,6% des produits (Classe C) ne représentent que 5% du CA. Cette répartition saine suggère néanmoins un potentiel d'optimisation : simplifier le catalogue en éliminant une partie des 418 références Classe C libérerait des ressources pour mieux gérer les produits stratégiques de Classe A.
+                L'analyse ABC confirme le principe de Pareto : seulement 22,6% des produits génèrent 79,96% du CA, tandis que la Classe B contribue à 15,05% du CA. Le déséquilibre majeur provient de la Classe C : 50,8% des produits ne représentent que 5% du CA, révélant une sur-prolifération du catalogue. Cette répartition impose une action urgente : éliminer 30-50% des références Classe C libérerait des ressources critiques (achats, stockage, merchandising) pour concentrer les efforts sur les 419 produits stratégiques de Classe A qui portent réellement la performance.
                 </div>
             """,
             unsafe_allow_html=True
@@ -757,16 +765,33 @@ with tab2:
 
         # Courbe de Pareto
         st.markdown("#### 📈 Courbe de Pareto (% cumulé du CA)")
-
         df_abc_full = pd.DataFrame(abc_data['data'])
-
-        # Limiter l'affichage pour la lisibilité
-        nb_affichage = st.slider("Nombre d'éléments à afficher", 10, min(100, len(df_abc_full)), min(50, len(df_abc_full)), key="abc_pareto")
-
+        
+        # Ajuster les paramètres du slider en fonction du nombre d'éléments
+        nb_elements = len(df_abc_full)
+        
+        # Définir min et max de manière adaptative
+        if nb_elements <= 10:
+            # Si très peu d'éléments, afficher tous sans slider
+            nb_affichage = nb_elements
+            st.info(f"Affichage des {nb_elements} éléments disponibles")
+        else:
+            # Sinon, afficher un slider avec des valeurs cohérentes
+            min_slider = min(10, nb_elements)
+            max_slider = min(100, nb_elements)
+            default_slider = min(50, nb_elements)
+            
+            nb_affichage = st.slider(
+                "Nombre d'éléments à afficher", 
+                min_slider, 
+                max_slider, 
+                default_slider, 
+                key="abc_pareto"
+            )
+        
         df_abc_display = df_abc_full.head(nb_affichage)
-
+        
         fig_pareto = make_subplots(specs=[[{"secondary_y": True}]])
-
         fig_pareto.add_trace(
             go.Bar(
                 name='CA',
@@ -776,7 +801,6 @@ with tab2:
             ),
             secondary_y=False
         )
-
         fig_pareto.add_trace(
             go.Scatter(
                 name='% Cumulé',
@@ -791,7 +815,6 @@ with tab2:
 
         # Ajouter ligne 80%
         fig_pareto.add_hline(y=80, line_dash="dash", line_color="green", annotation_text="80%", secondary_y=True)
-
         fig_pareto.update_layout(
             title="Courbe de Pareto",
             height=500
@@ -799,7 +822,6 @@ with tab2:
         fig_pareto.update_xaxes(title_text="Rang (du plus important au moins important)")
         fig_pareto.update_yaxes(title_text="CA (€)", secondary_y=False)
         fig_pareto.update_yaxes(title_text="% CA Cumulé", secondary_y=True, range=[0, 105])
-
         st.plotly_chart(fig_pareto, use_container_width=True)
 
         # Tableau détaillé avec filtrage par classe
