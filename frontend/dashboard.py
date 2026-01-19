@@ -355,12 +355,11 @@ with tab1:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                Cette matrice BCG révèle un <b>portefeuille déséquilibré avec 60 produits "Dilemmes"</b> (faible part de 
-                marché, forte croissance) nécessitant des décisions stratégiques urgentes, contre seulement <b>20 "Étoiles"</b>
-                à développer et <b>3 "Vaches à lait" à rentabiliser</b>. Les <b>17 "Poids morts"</b> devraient être abandonnés 
+                Cette matrice BCG révèle un portefeuille déséquilibré avec 60 produits "Dilemmes" nécessitant des décisions stratégiques urgentes, 
+                contre seulement 20 "Étoiles" à développer et 3 "Vaches à lait" à rentabiliser. Les 17 "Poids morts" devraient être abandonnés 
                 rapidement. 
-                La concentration de produits dans le quadrant "Dilemmes" indique une dispersion des efforts sur <b>trop de 
-                références non rentables</b>, obligeant l'entreprise à choisir lesquelles méritent l'investissement pour 
+                La concentration de produits dans le quadrant "Dilemmes" indique une dispersion des efforts sur trop de 
+                références non rentables, obligeant l'entreprise à choisir lesquelles méritent l'investissement pour 
                 devenir des "Étoiles" et lesquelles éliminer pour libérer des ressources.
             </div>
             """,
@@ -457,11 +456,10 @@ with tab1:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                L'analyse performance/marge segmente le catalogue en <b>4 priorités stratégiques</b> : <b>3 produits 
-                "Priorité</b> (CA élevé + marge élevée) à protéger absolument, <b>6 produits "À optimiser"</b> (CA élevé mais 
-                marge faible) nécessitant 
-                une renégociation des coûts, <b>6 produits</b> "À développer" (faible CA mais forte marge) offrant un potentiel 
-                de croissance, et <b>2 produits "À abandonner"</b>. Cette répartition équilibrée entre optimisation et 
+                L'analyse performance/marge segmente le catalogue en 4 priorités stratégiques : 3 produits 
+                "Priorité à protéger absolument, 6 produits "À optimiser" nécessitant 
+                une renégociation des coûts, 6 produits "À développer" offrant un potentiel 
+                de croissance, et 2 produits "À abandonner". Cette répartition équilibrée entre optimisation et 
                 développement 
                 suggère qu'avec les bonnes actions correctives sur les 6 produits à optimiser, l'entreprise pourrait 
                 significativement améliorer sa rentabilité globale sans compromettre le volume.
@@ -556,12 +554,10 @@ with tab1:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                <b>20 produits</b> génèrent à peine du profit avec un seuil de marge <b>sous 5%</b>, représentant <b>259 015€ 
-                de CA</b> (11,28% du 
-                total) mais détruisant de la valeur avec <b>15 références en perte réelle</b>. Le Cable Lock Keyed et plusieurs 
-                systèmes de reliure affichent des marges négatives catastrophiques (<b>jusqu'à -80%</b>), transformant du 
-                chiffre 
-                d'affaires en pertes. Cette situation critique exige une action immédiate : augmenter les prix de <b>10-15%</b> 
+                20 produits génèrent à peine du profit avec un seuil de marge sous 5%, représentant 259 015€ 
+                de CA (11,28% du total) mais détruisant de la valeur avec 15 références en perte réelle. La ligne rouge de marge affiche des 
+                valeurs négatives catastrophiques (jusqu'à -80%), transformant du 
+                chiffre d'affaires en pertes. Cette situation critique exige une action immédiate : augmenter les prix de 10-15% 
                 sur ces références, renégocier les conditions d'achat, ou supprimer ces produits toxiques qui drainent la 
                 rentabilité globale de l'entreprise.
             </div>
@@ -616,20 +612,20 @@ with tab2:
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
                 <b>1. Top 10 Produits par Chiffre d’Affaires</b><br>
-                Le <b>Canon imageCLASS 2200</b> domine largement le chiffre d’affaires (> 60 000€, soit presque 3x
-                plus que le deuxième produit), révélant une <b>forte dépendance à quelques références technologiques</b>, 
+                Le Canon imageCLASS 2200 domine largement le chiffre d’affaires (> 60 000€, soit presque 3x
+                plus que le deuxième produit), révélant une forte dépendance à quelques références technologiques, 
                 notamment des copieurs et systèmes de reliure. 
-                Cette concentration souligne le positionnement B2B de l’entreprise, mais suggère aussi un <b>risque de 
-                dépendance</b> et une opportunité de <b>diversification des produits vedettes</b>. <br><br>
+                Cette concentration souligne le positionnement B2B de l’entreprise, mais suggère aussi un risque de 
+                dépendance et une opportunité de diversification des produits vedettes. <br><br>
                 <b>2. Top 10 Produits par Profit</b><br>
                 Si le Canon imageCLASS reste le plus rentable (~25 000€), son avance est plus modérée, indiquant 
-                une <b>marge plus serrée</b>. À l’inverse, le <b>Fellowes PB500</b> se distingue par un excellent 
-                ratio profit / chiffre d’affaires, montrant que <b>volume et rentabilité ne coïncident pas 
-                toujours</b> et qu’un arbitrage stratégique est nécessaire. <br><br>
+                une marge plus serrée. À l’inverse, le Fellowes PB500 se distingue par un excellent 
+                ratio profit / chiffre d’affaires, montrant que volume et rentabilité ne coïncident pas 
+                toujours et qu’un arbitrage stratégique est nécessaire. <br><br>
                 <b>3. Top 10 Produits par Quantité</b><br>
-                Les <b>consommables bureautiques</b> (papier, enveloppes, agrafes) dominent les volumes, mais ont 
-                un <b>faible impact sur le chiffre d’affaires</b>. Cette structure révèle un <b>modèle à deux 
-                vitesses</b> : les consommables génèrent récurrence et fidélisation, tandis que les équipements 
+                Les consommables bureautiques (papier, enveloppes, agrafes) dominent les volumes, mais ont 
+                un faible impact sur le chiffre d’affaires. Cette structure révèle un modèle à deux 
+                vitesses : les consommables génèrent récurrence et fidélisation, tandis que les équipements 
                 technologiques portent la rentabilité.
                 </div>
             """,
@@ -660,13 +656,12 @@ with tab2:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                La catégorie <b>Technology</b> domine avec <b>836 000€ de CA</b> et <b>145 000€ de profit</b> 
-                (marge <b>17,4%</b>).
-                Les <b>Office Supplies</b> suivent avec un CA similaire mais marge comparable, tandis que 
-                <b>Furniture</b>, malgré un CA correct, affiche une marge très faible (<b>2,5%</b>), détruisant 
+                La catégorie Technology domine avec 836 000€ de CA et 145 000€ de profit (marge 17,4%).
+                Les Office Supplies suivent avec un CA similaire mais marge comparable, tandis que 
+                Furniture, malgré un CA correct, affiche une marge très faible (2,5%), détruisant 
                 presque la rentabilité.
-                La vraie valeur se situe donc dans <b>Technology et Office Supplies</b>.
-                L’entreprise devrait <b>repenser sa stratégie Furniture</b> : augmenter les prix, réduire les coûts 
+                La vraie valeur se situe donc dans Technology et Office Supplies.
+                L’entreprise devrait repenser sa stratégie Furniture : augmenter les prix, réduire les coûts 
                 ou envisager un abandon.
                 </div>
             """,
@@ -748,6 +743,16 @@ with tab2:
             hide_index=True
         )
 
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                L'analyse ABC révèle une concentration classique de la valeur : 50,8% des produits (940 références, Classe A) génèrent 79,8% du CA, confirmant le principe de Pareto où une minorité de références porte l'essentiel des ventes. La Classe B (26,5% des produits) contribue à 15,1% du CA, offrant un équilibre volume/valeur raisonnable, tandis que 22,6% des produits (Classe C) ne représentent que 5% du CA. Cette répartition saine suggère néanmoins un potentiel d'optimisation : simplifier le catalogue en éliminant une partie des 418 références Classe C libérerait des ressources pour mieux gérer les produits stratégiques de Classe A.
+                </div>
+            """,
+            unsafe_allow_html=True
+        )
+
         st.divider()
 
         # Courbe de Pareto
@@ -825,6 +830,16 @@ with tab2:
                 use_container_width=True,
                 hide_index=True
             ) 
+
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                La courbe de Pareto visualise la concentration extrême du CA : les 50 premiers produits (sur 1 850) génèrent déjà 80% du CA total, formant le coude critique de la courbe. Le premier produit seul pèse environ 60 000€, et les 10 premiers cumulent près de 15% du CA. Cette visualisation confirme qu'un tout petit nombre de références pilote la performance : concentrer les efforts commerciaux, la gestion des stocks et les négociations fournisseurs sur ces 50 produits critiques pourrait maximiser l'efficacité opérationnelle, tandis que les 1 800 autres références mériteraient une gestion plus automatisée et simplifiée.
+                </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 # =============================================
 # TAB 3 : ÉVOLUTION TEMPORELLE
@@ -910,18 +925,18 @@ with tab3:
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
                 <b>1. Évolution Temporelle par jour</b><br>
-                La vue quotidienne montre une <b>forte volatilité</b> avec des pics jusqu’à <b>30 000€</b> certains jours et de
-                longues périodes quasi-nulles. Les gros CA ponctuels proviennent probablement de <b>grosses commandes B2B</b>, 
-                posant un défi de <b>trésorerie et de planification</b>. <br><br>
+                La vue quotidienne montre une forte volatilité avec des pics jusqu’à 30 000€ certains jours et de
+                longues périodes quasi-nulles. Les gros CA ponctuels proviennent probablement de grosses commandes B2B, 
+                posant un défi de trésorerie et de planification. <br><br>
                 <b>2. Évolution Temporelle par mois</b><br>
-                L’agrégation mensuelle lisse la volatilité et révèle une <b>tendance haussière</b> de 2015 à 2018 : le CA moyen 
-                passe de <b>40 000€</b> à plus de <b>100 000€</b>. Les commandes suivent une progression régulière, confirmant 
-                une <b>croissance soutenue</b> sur 4 ans, avec accélération notable depuis mi-2017. <br><br>
+                L’agrégation mensuelle lisse la volatilité et révèle une tendance haussière de 2015 à 2018 : le CA moyen 
+                passe de 40 000€ à plus de 100 000€. Les commandes suivent une progression régulière, confirmant 
+                une croissance soutenue sur 4 ans, avec accélération notable depuis mi-2017. <br><br>
                 <b>3. Évolution Temporelle par année</b><br>
-                La vue annuelle confirme une <b>croissance solide</b> : le CA progresse de <b>470 000€</b> à <b>700 000€</b> 
-                entre 2015 et 2018, et les commandes de 1 000 à 1 600+. L’ascension constante démontre la <b>solidité du modèle</b>
-                et l’efficacité opérationnelle, avec 2018 comme année record. La question stratégique : <b>comment dépasser le 
-                million d’euros</b> ?
+                La vue annuelle confirme une croissance solide : le CA progresse de 470 000€ à 700 000€ 
+                entre 2015 et 2018, et les commandes de 1 000 à 1 600+. L’ascension constante démontre la solidité du modèle
+                et l’efficacité opérationnelle, avec 2018 comme année record. La question stratégique : comment dépasser le 
+                million d’euros ?
             </div>
             """,
             unsafe_allow_html=True
@@ -1002,10 +1017,8 @@ with tab3:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                Le CA moyen mensuel atteint <b>47 858€</b> avec <b>104 commandes moyennes par mois</b>, le pic historique 
-                restant novembre 
-                2018. La croissance moyenne de <b>40,7%</b> démontre une dynamique exceptionnelle, bien que le pire mois 
-                (février 
+                Le CA moyen mensuel atteint 47 858€ avec 104 commandes moyennes par mois, le pic historique 
+                restant novembre 2018. La croissance moyenne de 40,7% démontre une dynamique exceptionnelle, bien que le pire mois (février 
                 2015) contraste fortement avec cette tendance. La moyenne mobile sur 3 mois lisse la volatilité et révèle une 
                 accélération constante de fin 2017 à fin 2018, où la courbe rouge (tendance) converge puis dépasse 
                 ponctuellement la courbe bleue (réel), signalant un momentum positif qui devrait être capitalisé en 2019.
@@ -1059,11 +1072,9 @@ with tab3:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                L'analyse <b>Year-over-Year</b> montre une croissance volatile mais majoritairement positive : janvier 2016 
-                explose à 
-                <b>+160%</b> (effet de base faible), suivie de fluctuations entre <b>-40% et +140%</b>. À partir de 2017, la 
-                croissance se 
-                stabilise entre <b>+10% et +90%</b>, avec une tendance haussière marquée. Fin 2018 ralentit légèrement (+20-
+                L'analyse Year-over-Year montre une croissance volatile mais majoritairement positive : janvier 2016 
+                explose à +160% (effet de base faible), suivie de fluctuations entre -40% et +140%. À partir de 2017, la 
+                croissance se stabilise entre +10% et +90%, avec une tendance haussière marquée. Fin 2018 ralentit légèrement (+20-
                 50%), ce qui est normal après une forte croissance. Cette volatilité en dents de scie suggère des effets 
                 saisonniers ou des variations ponctuelles de commandes importantes, mais la tendance générale reste 
                 solidement positive sur 3 ans.
@@ -1125,12 +1136,12 @@ with tab4:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                La heatmap révèle une performance par État très contrastée : la Californie (West) domine en <b>taille et marge</b>, 
+                La heatmap révèle une performance par État très contrastée : la Californie (West) domine en taille et marge, 
                 tandis que Pennsylvania, Texas, Ohio et Illinois (en rouge/orange) affichent des marges négatives ou très 
-                faibles malgré des volumes importants. New York, bien que générant du CA, souffre également de <b>rentabilité</b>. 
-                Cette cartographie met en évidence un paradoxe : <b>les plus gros États ne sont pas les plus rentables</b>. 
+                faibles malgré des volumes importants. New York, bien que générant du CA, souffre également de rentabilité. 
+                Cette cartographie met en évidence un paradoxe : les plus gros États ne sont pas les plus rentables. 
                 L'entreprise doit investiguer les causes (prix trop bas, coûts logistiques, mix produit défavorable) et 
-                corriger rapidement la situation dans ces États stratégiques pour <b>transformer du volume en profit</b>.
+                corriger rapidement la situation dans ces États stratégiques pour transformer du volume en profit.
             </div>
             """,
             unsafe_allow_html=True
@@ -1173,12 +1184,11 @@ with tab4:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                <b>604 villes</b> génèrent un CA moyen de <b>3 803€ par ville</b>, New York City dominant largement avec plus 
-                de <b>250 000€</b>, 
-                soit presque le double de Los Angeles (200 000€). Les régions East et West concentrent les plus grosses villes 
+                604 villes génèrent un CA moyen de 3 803€ par ville, New York City dominant largement avec plus 
+                de 250 000€, soit presque le double de Los Angeles (200 000€). Les régions East et West concentrent les plus grosses villes 
                 performantes, tandis que Central (Houston, Chicago, Detroit) et South (Jacksonville, San Antonio) ont des 
                 contributions plus modestes. Cette concentration géographique sur quelques métropoles majeures révèle un 
-                <b>potentiel inexploité</b> dans les villes moyennes : développer la présence commerciale dans les 580+ villes 
+                potentiel inexploité dans les villes moyennes : développer la présence commerciale dans les 580+ villes 
                 à faible CA pourrait doubler le chiffre d'affaires national.
             </div>
             """,
@@ -1216,11 +1226,11 @@ with tab4:
             """
             <div class="info-card">
                 <div class="info-title">Analyse Géographique – Synthèse</div>
-                Les régions <b>West</b> et <b>East</b> dominent le chiffre d’affaires (<b>725 000€</b> et <b>679 000€</b>), 
-                représentant 55% de l’activité. La répartition des clients reste équilibrée (<b>27,4% West</b>, <b>26,9% East</b>), 
-                mais le <b>profit</b> par région montre une surperformance de West (<b>108 000€</b> vs 91 000€).
-                Les régions <b>Central</b> et <b>South</b>, avec une densité de clients similaire mais un CA inférieur, 
-                représentent un <b>potentiel de croissance</b> important si les actions commerciales sont adaptées.
+                Les régions West et East dominent le chiffre d’affaires (725 000€ et 679 000€), 
+                représentant 55% de l’activité. La répartition des clients reste équilibrée (27,4% West, 26,9% East), 
+                mais le profit par région montre une surperformance de West (108 000€ vs 91 000€).
+                Les régions Central et South, avec une densité de clients similaire mais un CA inférieur, 
+                représentent un potentiel de croissance important si les actions commerciales sont adaptées.
             </div>
             """,
             unsafe_allow_html=True
@@ -1272,12 +1282,12 @@ with tab5:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                Avec <b>98,5 % de clients récurrents</b>, l’entreprise affiche une <b>fidélisation exceptionnelle</b> et 
-                des relations commerciales régulières (<b>6,3 commandes par client</b>).
-                Le faible nombre de nouveaux clients suggère une <b>phase de maturité</b> ou un ralentissement de 
+                Avec 98,5 % de clients récurrents, l’entreprise affiche une fidélisation exceptionnelle et 
+                des relations commerciales régulières (6,3 commandes par client).
+                Le faible nombre de nouveaux clients suggère une phase de maturité ou un ralentissement de 
                 l’acquisition.
-                Enfin, la répartition homogène du chiffre d’affaires du <b>top 10 clients</b> indique une 
-                <b>base clients équilibrée</b>, sans dépendance excessive à un compte unique.
+                Enfin, la répartition homogène du chiffre d’affaires du top 10 clients indique une 
+                base clients équilibrée, sans dépendance excessive à un compte unique.
                 </div>
             """,
             unsafe_allow_html=True
@@ -1295,12 +1305,12 @@ with tab5:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                Le segment <b>Consumer</b> domine largement le chiffre d’affaires (> <b>1,2 M€</b>), loin devant les 
+                Le segment Consumer domine largement le chiffre d’affaires (> 1,2 M€), loin devant les 
                 segments Corporate et Home Office.
-                Cependant, les écarts de <b>marge</b> suggèrent que ces segments plus modestes pourraient offrir 
-                une <b>rentabilité ou une stabilité supérieure</b>.
-                Cette structure pose un enjeu stratégique clair : <b>poursuivre la spécialisation Consumer</b> ou 
-                <b>diversifier</b> vers des segments à plus forte valeur ajoutée.
+                Cependant, les écarts de marge suggèrent que ces segments plus modestes pourraient offrir 
+                une rentabilité ou une stabilité supérieure.
+                Cette structure pose un enjeu stratégique clair : poursuivre la spécialisation Consumer ou 
+                diversifier vers des segments à plus forte valeur ajoutée.
             </div>
             """,
             unsafe_allow_html=True
@@ -1363,6 +1373,16 @@ with tab5:
             )
             st.plotly_chart(fig_rfm_bar, use_container_width=True)
 
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                La segmentation RFM (Récence, Fréquence, Montant) classe les 793 clients selon leur comportement d'achat, révélant une récence moyenne de 147 jours et une fréquence de 6,3 achats pour un montant moyen de 2 897€. Les segments "Fidèles" et "Champions" dominent le CA avec plus de 600 000€ chacun, représentant les clients les plus actifs et généreux. Les "À risque" (18,3% des clients) et "Perdus" (21,6%) nécessitent des actions de reconquête urgentes, tandis que les "Nouveaux" (11,2%) doivent être rapidement convertis en clients réguliers. Cette segmentation actionnable permet de prioriser les efforts marketing : récompenser les Champions, réactiver les clients À risque, et accompagner les Nouveaux vers la fidélisation.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
         # Top clients RFM
         st.markdown("#### 🏆 Top 20 Clients (Score RFM)")
         df_top_rfm = pd.DataFrame(rfm_data['top_clients'])
@@ -1394,6 +1414,16 @@ with tab5:
                 use_container_width=True,
                 hide_index=True
             )
+
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                L'analyse des top clients par score RFM révèle des profils d'achat très différenciés : certains clients "Champions" combinent haute fréquence (11-12 achats) et montant élevé (10 000-12 000€), tandis que d'autres privilégient des achats moins fréquents mais très généreux. Le cluster visible autour de 9-12 achats et 4 000-8 000€ représente le cœur des meilleurs clients. Cette dispersion suggère l'existence de plusieurs typologies de clients premium nécessitant des stratégies différenciées : programmes de fidélité pour les acheteurs fréquents à montant modéré, et relation commerciale personnalisée pour les gros acheteurs occasionnels.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     # --- CUSTOMER LIFETIME VALUE ---
     with client_tab3:
@@ -1476,6 +1506,16 @@ with tab5:
                 hide_index=True
             )
 
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                La CLV moyenne de 11 434€ sur 3 ans (médiane à 2 603€) révèle une forte disparité de valeur client, avec 31,4% des clients "Élevés" représentant 7 millions d'euros cumulés. Cette concentration atteint son paroxysme dans le top 20, dominé par Jenna Caffey, Susan Mackendrick et Theresa Coyne, soit des actifs clients extraordinaires qui, à eux seuls, représentent plus de 15% de la valeur future totale. L'écart brutal avec le reste du top 20 (sous 200 000€) et les 23% de clients à "Faible" CLV crée un double enjeu stratégique : d'une part, la perte d'un seul top 5 client détruirait plusieurs centaines de milliers d'euros de valeur, nécessitant un account management dédié avec contrats pluriannuels et support premium ; d'autre part, l'allocation budgétaire doit impérativement être repensée pour surinvestir dans la rétention des clients à fort potentiel tout en automatisant le service des clients à faible CLV pour préserver la rentabilité globale.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # --- DÉLAI DE RÉACHAT ---
     with client_tab4:
         st.markdown("#### 🔄 Délai Moyen de Réachat")
@@ -1541,6 +1581,16 @@ with tab5:
         )
         st.plotly_chart(fig_distrib, use_container_width=True)
 
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                Le délai moyen de réachat de 189 jours (médiane 129 jours) sur 4 199 rachats révèle un cycle d'achat relativement long, cohérent avec un modèle B2B de fournitures et équipements. La distribution montre une concentration dans les tranches 90-180 jours (environ 2 000 rachats), suggérant un cycle naturel trimestriel ou semestriel. Les 3 segments client (Consumer, Corporate, Home Office) affichent des délais comparables (environ 190 jours moyens), indiquant des comportements d'approvisionnement similaires. Cette donnée permet d'optimiser les relances commerciales : contacter proactivement les clients 15-30 jours avant leur date de réachat prévue pourrait améliorer la rétention et prévenir le churn.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # --- TAUX DE RÉTENTION ---
     with client_tab5:
         st.markdown("#### 📈 Taux de Rétention (Cohort Analysis)")
@@ -1593,6 +1643,16 @@ with tab5:
                 st.warning("Pas assez de données pour afficher la matrice de rétention.")
         else:
             st.warning("Aucune donnée de cohorte disponible.")
+
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                L'analyse de cohorte révèle des taux de rétention alarmants : seulement 6,1% des clients rachètent après 1 mois, 8,6% après 3 mois et 10,2% après 6 mois. La matrice par cohorte (12 derniers mois) montre un schéma récurrent de forte attrition : le premier mois (M0) affiche 100% de rétention (vert), puis chute drastiquement à moins de 20% dès M1-M2 (rouge), avec quelques périodes de réactivation sporadiques (jaune-orange). Cette hémorragie de clients nouveaux indique un problème majeur d'onboarding ou d'adéquation produit-marché : moins de 10% des nouveaux clients deviennent récurrents, obligeant à une acquisition constante coûteuse plutôt qu'à capitaliser sur une base fidèle. Des actions d'activation post-première commande sont critiques pour inverser cette tendance.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 # =============================================
 # TAB 6 : ANALYSE DES PERTES
@@ -1662,6 +1722,16 @@ with tab6:
                     use_container_width=True,
                     hide_index=True
                 )
+        
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                Sur les 5 009 commandes totales, 1 022 (20,40%) génèrent une perte nette de 66 897€, soit une perte moyenne de 65€ par commande déficitaire. Le top 20 des commandes les plus déficitaires révèle des pertes allant jusqu'à 7 000€ (commande CA-2017-160326), principalement causées par des remises excessives (50-80% de discount en rouge foncé). Cette hémorragie financière concentrée sur quelques transactions catastrophiques indique un manque de contrôle sur les politiques de remise : certaines commandes sont vendues à perte massive, détruisant plusieurs milliers d'euros de marge. L'entreprise doit immédiatement instaurer des seuils d'approbation pour les remises supérieures à 20% et investiguer ces transactions aberrantes pour identifier s'il s'agit d'erreurs commerciales, de tarifications inadaptées ou de clients exploitant les politiques de discount.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     # --- PERTES LIÉES AUX REMISES ---
     with detail_tab2:
@@ -1750,6 +1820,16 @@ with tab6:
                 hide_index=True
             )
 
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                L'analyse comparative révèle un paradoxe destructeur : 52,64% du CA (1,2M€) bénéficie de remises, générant une marge négative catastrophique de -2,86%, tandis que les ventes sans remise (1,09M€) affichent une marge saine de 29,51%. Les remises supérieures à 20% créent une destruction massive de valeur avec une marge de -40%, et même les tranches 0-5% et 5-10% dégradent significativement la rentabilité (respectivement 29,5% et 16,6% de marge). Cette politique de remise agressive transforme plus de la moitié du CA en activité déficitaire : chaque euro de remise accordée coûte bien plus qu'il ne rapporte. L'entreprise doit radicalement restreindre les remises, interdire tout discount au-delà de 15%, et former les commerciaux à vendre la valeur plutôt que le prix pour restaurer la rentabilité.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # --- MARGES INSUFFISANTES ---
     with detail_tab3:
         st.markdown("#### 💰 Produits à Marges Insuffisantes")
@@ -1826,6 +1906,16 @@ with tab6:
                 use_container_width=True,
                 hide_index=True
             )
+
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                39 produits affichent des marges unitaires insuffisantes avec un prix de vente moyen de 809€ contre un coût moyen de 757€, laissant une marge dérisoire de 52€ (6,5%). Le graphique Prix vs Coût révèle plusieurs produits vendus à perte ou quasi à perte, notamment le Canon imageCLASS (près de 4 000€ de prix pour un coût similaire) et plusieurs systèmes de reliure où le coût dépasse le prix de vente (barres rouges supérieures aux vertes). La carte des marges unitaires confirme ce diagnostic avec de nombreux produits en rouge (marge négative) ou jaune (marge quasi-nulle). Ces références toxiques nécessitent une action immédiate : augmentation tarifaire de 15-25%, renégociation des prix d'achat fournisseurs, ou retrait pur et simple du catalogue pour éviter de subventionner les clients avec des produits non rentables.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 # =============================================
 # TAB 7 : LIVRAISONS
@@ -1934,6 +2024,16 @@ with tab7:
             )
             st.plotly_chart(fig_delais_region, use_container_width=True)
 
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                Les délais de livraison moyens et médians s'établissent à 4 jours, avec un minimum de 0 jour (livraison le jour même) et un maximum de 7 jours, démontrant une performance logistique plutôt correcte. L'analyse par mode d'expédition montre que First Class et Second Class offrent les délais les plus courts (2 & 3 jours moyens/médians) après Same day qui est à 0 jours, tandis que Standard Class prend logiquement plus de temps (5 jours). La distribution des délais révèle une forte concentration dans les tranches 2-4 jours et 4-7 jours (environ 4 000 livraisons chacun), avec très peu de retards extrêmes (>7 jours). Par région, Central affiche les délais les plus élevés (4 jours), suggérant des contraintes géographiques ou logistiques. Cette performance opérationnelle satisfaisante constitue un atout compétitif à capitaliser dans la communication client, tout en optimisant la région Central pour homogénéiser le service.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # --- LIVRAISONS TARDIVES ---
     with livraison_tab2:
         st.markdown("#### ⏰ Analyse des Livraisons Tardives")
@@ -2019,6 +2119,16 @@ with tab7:
                 use_container_width=True,
                 hide_index=True
             )
+
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                Sur 9 994 livraisons totales, seulement 1 livraison est en retard (0,01%), démontrant une excellence opérationnelle quasi-parfaite. Cette unique livraison tardive provient du mode First Class et de la région East. La totalité des retards provient de la catégorie Office Supplies. Cette performance logistique exceptionnelle constitue un différenciateur majeur face à la concurrence : 99,99% de fiabilité de livraison est un argument commercial puissant qui devrait être mis en avant dans toute la communication, renforçant la confiance client et justifiant potentiellement des prix premium par rapport aux concurrents moins fiables.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     # --- PERFORMANCE PAR MODE ---
     with livraison_tab3:
@@ -2109,6 +2219,16 @@ with tab7:
             }),
             use_container_width=True,
             hide_index=True
+        )
+
+        st.markdown(
+            """
+            <div class="info-card">
+                <div class="info-title">Data Storytelling</div>
+                Standard Class domine massivement avec 1,36M€ de CA et 2 994 commandes, mais génère la marge la plus faible avec un délai de 5 jours, créant un dilemme stratégique visualisé dans le graphique de compromis. First Class, bien que ne représentant que 351 000€ de CA et 787 commandes, affiche la meilleure marge (13,93%) avec le délai le plus rapide après Same Day, démontrant qu'une livraison plus rapide peut être plus rentable. Same Day, malgré son délai minimal, affiche un positionnement intermédiaire peu attractif avec seulement 128 000€, 264 commandes et une marge de 12,38%, ne justifiant pas son coût opérationnel. Cette analyse croisée révèle une opportunité stratégique majeure : migrer progressivement 20-30% des clients Standard Class vers First Class ou Second Class en valorisant la réduction de délai (-2 à -3 jours) contre une légère surcharge tarifaire améliorerait simultanément la marge globale de 1-2 points, la satisfaction client, et l'efficacité opérationnelle, tout en compensant largement les coûts logistiques supplémentaires par une meilleure rentabilité unitaire.
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
 st.divider()
