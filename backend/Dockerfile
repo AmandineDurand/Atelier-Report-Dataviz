@@ -11,12 +11,7 @@ RUN apt-get update && apt-get install -y \
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir \
-    fastapi==0.109.0 \
-    uvicorn[standard]==0.27.0 \
-    pydantic==2.5.3 \
-    pandas==2.1.4 \
-    numpy==1.26.3
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY main.py .
 

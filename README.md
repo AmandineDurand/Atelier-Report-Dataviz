@@ -1,49 +1,46 @@
-# 🛒 Superstore BI - API FastAPI + Dashboard Streamlit
+# 🛒 Superstore BI - Advanced Analytics Dashboard
 
-Système complet d'analyse Business Intelligence du dataset **Sample Superstore** avec API REST et dashboard interactif.
+Système complet d'analyse Business Intelligence avancée du dataset **Sample Superstore** avec API REST FastAPI et dashboard interactif Streamlit.
 
-## 🎯 Objectifs pédagogiques
+## 🎯 Nouvelles Fonctionnalités (v2.0)
 
-Ce projet permet d'apprendre :
-- ✅ Développement d'une **API REST** avec FastAPI
-- ✅ Création de **dashboards interactifs** avec Streamlit/Plotly
-- ✅ Analyse de données avec **Pandas**
-- ✅ Calcul de **KPI e-commerce**
-- ✅ Tests unitaires avec **pytest**
+### 📊 Tab Produits - Analyses Stratégiques
+- **Matrice BCG** (Boston Consulting Group)
+  - Axe X : Part de marché (% du CA total)
+  - Axe Y : Croissance YoY (année N vs N-1)
+  - Quadrants : Étoiles ⭐, Vaches à lait 🐄, Dilemmes ❓, Poids morts 💀
+- **Produits à faible marge**
+  - Identification des produits qui vendent mais ne rapportent pas
+  - Seuil de marge configurable
+  - Indicateur de rotation des stocks
+- **Top produits** par CA, Profit ou Quantité
 
----
+### 📦 Tab Catégories - Visualisations Avancées
+- **Graphique Waterfall** (Cascade)
+  - Contribution de chaque catégorie au profit total
+  - Détail par sous-catégorie
+- **Matrice Performance/Marge** (4 quadrants)
+  - Q1 🌟 : CA élevé + Marge élevée → Priorité
+  - Q2 ⚙️ : CA élevé + Marge faible → À optimiser
+  - Q3 📈 : CA faible + Marge élevée → À développer
+  - Q4 ❌ : CA faible + Marge faible → À abandonner
 
-## 📊 KPI implémentés
+### 📅 Tab Temporel - Tendances et Saisonnalité
+- **Moyenne mobile** (3 mois) pour lisser les variations
+- **Comparaison N/N-1** avec année précédente en transparence
+- **Taux de croissance** période par période
+- **Analyse de saisonnalité**
+  - Graphique radar du pattern mensuel
+  - Indice de saisonnalité (base 100)
+  - Heatmap CA par année et mois
 
-### 🔹 KPI Globaux
-- 💰 Chiffre d'affaires total
-- 🧾 Nombre de commandes
-- 👤 Nombre de clients uniques
-- 🛒 Panier moyen
-- 📦 Quantité vendue
-- 💵 Profit total
-- 📈 Marge moyenne
-
-### 🔹 KPI Produits
-- 🏆 Top 10 produits par CA/Profit/Quantité
-- 📦 CA par catégorie
-- 💹 Marge par produit
-- ⚠️ Produits les moins rentables
-
-### 🔹 KPI Clients
-- 💎 Top clients par CA
-- 🔄 Clients récurrents vs nouveaux
-- 📊 Fréquence d'achat
-- 💼 Performance par segment
-
-### 🔹 KPI Temporels
-- 📅 Évolution du CA par jour/mois/année
-- 📈 Comparaison des périodes
-- 🌡️ Saisonnalité
-
-### 🔹 KPI Géographiques
-- 🌍 CA par région
-- 📍 Nombre de clients par zone
+### 🌍 Tab Géographique - Performance Relative
+- **CA par client** (performance relative)
+- **Treemap/Heatmap États** avec code couleur selon la marge
+- **Classement des villes** les plus performantes
+  - Top par CA
+  - Top par Marge
+  - Top par CA/Client
 
 ---
 
@@ -53,250 +50,266 @@ Ce projet permet d'apprendre :
 superstore-bi/
 │
 ├── backend/
-│   └── main.py              # API FastAPI (endpoints KPI)
+│   ├── main.py              # API FastAPI (endpoints KPI avancés)
+│   ├── Dockerfile
+│   └── requirements.txt
 │
 ├── frontend/
-│   └── dashboard.py         # Dashboard Streamlit
+│   ├── dashboard.py         # Dashboard Streamlit avancé
+│   ├── Dockerfile
+│   └── requirements.txt
 │
 ├── tests/
 │   └── test_api.py          # Tests unitaires
 │
-├── requirements.txt         # Dépendances Python
-└── README.md                # Ce fichier
+├── docker-compose.yml       # Orchestration des services
+├── .dockerignore
+└── README.md
 ```
 
 ---
 
 ## 🚀 Installation et démarrage
 
-### 1️⃣ Prérequis
-
-- Python 3.8+ installé
-- pip installé
-
-### 2️⃣ Installation des dépendances
+### Option 1 : Docker Compose (Recommandé)
 
 ```bash
-# Cloner ou créer le projet
-mkdir superstore-bi
+# Cloner le projet
+git clone <repository>
 cd superstore-bi
 
-# Installer les dépendances
+# Lancer les services
+docker-compose up --build
+
+# Ou en arrière-plan
+docker-compose up -d --build
+```
+
+✅ API : **http://localhost:8000**
+✅ Dashboard : **http://localhost:8501**
+📚 Documentation API : **http://localhost:8000/docs**
+
+### Option 2 : Installation locale
+
+```bash
+# Backend
+cd backend
 pip install -r requirements.txt
+python main.py
+
+# Frontend (nouveau terminal)
+cd frontend
+pip install -r requirements.txt
+streamlit run dashboard.py
 ```
-
-### 3️⃣ Démarrer l'API FastAPI
-
-```bash
-# Dans un premier terminal
-python backend/main.py
-```
-
-✅ L'API sera accessible sur **http://localhost:8000**
-📚 Documentation Swagger : **http://localhost:8000/docs**
-
-### 4️⃣ Démarrer le Dashboard Streamlit
-
-```bash
-# Dans un second terminal
-streamlit run frontend/dashboard.py
-```
-
-✅ Le dashboard sera accessible sur **http://localhost:8501**
-
-
 
 ---
 
-## 📖 Utilisation de l'API
+## 📖 Nouveaux Endpoints API
 
-### Exemples de requêtes
+### KPI Produits Avancés
 
-#### **1. KPI globaux**
 ```bash
-# Sans filtre
-curl http://localhost:8000/kpi/globaux
+# Matrice BCG
+curl "http://localhost:8000/kpi/produits/bcg?limite=50"
 
-# Avec filtres
-curl "http://localhost:8000/kpi/globaux?date_debut=2015-01-01&categorie=Technology"
+# Produits à faible marge
+curl "http://localhost:8000/kpi/produits/faible-marge?seuil_marge=5&limite=20"
 ```
 
-**Réponse** :
+### KPI Catégories Avancés
+
+```bash
+# Waterfall profit
+curl http://localhost:8000/kpi/categories/waterfall
+
+# Matrice performance/marge
+curl http://localhost:8000/kpi/categories/matrix
+```
+
+### KPI Temporels Avancés
+
+```bash
+# Analyse avancée (MM, N-1, croissance)
+curl http://localhost:8000/kpi/temporel/avance
+
+# Saisonnalité
+curl http://localhost:8000/kpi/temporel/saisonnalite
+```
+
+### KPI Géographiques Avancés
+
+```bash
+# Performance par État
+curl http://localhost:8000/kpi/geographique/etats
+
+# Top villes
+curl "http://localhost:8000/kpi/geographique/villes?limite=20"
+```
+
+---
+
+## 📊 Réponses API Exemples
+
+### Matrice BCG
 ```json
 {
-  "ca_total": 2297200.86,
-  "nb_commandes": 5009,
-  "nb_clients": 793,
-  "panier_moyen": 458.58,
-  "quantite_vendue": 37873,
-  "profit_total": 286397.02,
-  "marge_moyenne": 12.47
+  "data": [
+    {
+      "produit": "Canon imageCLASS...",
+      "categorie": "Technology",
+      "ca_actuel": 61599.82,
+      "croissance": 25.4,
+      "part_marche": 2.15,
+      "marge_pct": 18.5,
+      "quadrant": "Étoile ⭐"
+    }
+  ],
+  "seuils": {
+    "part_marche_mediane": 0.12,
+    "croissance_mediane": 8.5
+  },
+  "repartition": {
+    "etoiles": 12,
+    "vaches": 18,
+    "dilemmes": 8,
+    "poids_morts": 62
+  }
 }
 ```
 
-#### **2. Top produits**
-```bash
-# Top 10 par CA
-curl http://localhost:8000/kpi/produits/top
-
-# Top 5 par profit
-curl "http://localhost:8000/kpi/produits/top?limite=5&tri_par=profit"
+### Waterfall Catégories
+```json
+{
+  "waterfall": [
+    {"label": "Technology", "value": 145454.95, "type": "category"},
+    {"label": "Office Supplies", "value": 122490.80, "type": "category"},
+    {"label": "Furniture", "value": 18451.27, "type": "category"}
+  ],
+  "profit_total": 286397.02
+}
 ```
 
-#### **3. Performance catégories**
-```bash
-curl http://localhost:8000/kpi/categories
-```
-
-#### **4. Évolution temporelle**
-```bash
-# Par mois
-curl "http://localhost:8000/kpi/temporel?periode=mois"
-
-# Par année
-curl "http://localhost:8000/kpi/temporel?periode=annee"
-```
-
-#### **5. Performance géographique**
-```bash
-curl http://localhost:8000/kpi/geographique
-```
-
-#### **6. Analyse clients**
-```bash
-curl "http://localhost:8000/kpi/clients?limite=10"
+### Saisonnalité
+```json
+{
+  "data": [
+    {
+      "month": 1,
+      "month_name": "January",
+      "ca_moyen": 45230.50,
+      "indice_saisonnalite": 78.5,
+      "volatilite": 12.3
+    }
+  ],
+  "statistiques": {
+    "mois_pic": "November",
+    "indice_pic": 142.5,
+    "mois_creux": "February",
+    "indice_creux": 65.2
+  }
+}
 ```
 
 ---
 
-## 🎨 Fonctionnalités du Dashboard
+## 🎨 Fonctionnalités Dashboard
 
-### ✅ Filtres interactifs
+### Visualisations Interactives
+- 📊 Scatter plots zoomables (Matrice BCG)
+- 📈 Graphiques en cascade (Waterfall)
+- 🎯 Matrices à quadrants
+- 📅 Radar de saisonnalité
+- 🗺️ Treemaps géographiques
+- 📉 Courbes avec moyenne mobile
+
+### Filtres Dynamiques
 - 📅 Plage de dates
 - 📦 Catégorie
 - 🌍 Région
 - 👥 Segment client
 
-### ✅ Visualisations Plotly
-- 📊 Graphiques en barres interactifs
-- 📈 Courbes d'évolution temporelle
-- 🥧 Graphiques circulaires
-- 📉 Graphiques combinés
-
-### ✅ KPI Cards
+### KPI Cards
 - Affichage en temps réel
 - Mise en forme automatique (€, %, nombres)
-- Organisation claire
-
-### ✅ Tabs organisés
-- 🏆 Produits
-- 📦 Catégories
-- 📅 Temporel
-- 🌍 Géographique
+- Comparaisons et variations
 
 ---
 
-## 🗃️ Dataset utilisé
+## 🔧 Configuration
 
-**Source** : [Sample Superstore sur GitHub](https://github.com/leonism/sample-superstore)
+### Variables d'environnement
 
-**Colonnes principales** :
-- `Order ID` : Identifiant de commande
-- `Order Date` : Date de commande
-- `Customer ID` : Identifiant client
-- `Product Name` : Nom du produit
-- `Category` / `Sub-Category` : Catégorie
-- `Sales` : Chiffre d'affaires
-- `Quantity` : Quantité
-- `Discount` : Remise
-- `Profit` : Profit
-- `Region` : Région géographique
+| Variable | Description | Défaut |
+|----------|-------------|--------|
+| `API_URL` | URL de l'API backend | `http://localhost:8000` |
+| `PYTHONUNBUFFERED` | Output Python non bufferisé | `1` |
+
+### Seuils configurables
+
+- **BCG** : Part marché > 0.5%, Croissance > 10%
+- **Faible marge** : Marge < 5% (configurable)
+- **Matrice catégories** : Médianes CA et Marge
+
+---
+
+## 📚 Technologies utilisées
+
+- **Backend** : FastAPI, Pandas, NumPy, Pydantic
+- **Frontend** : Streamlit, Plotly, Requests
+- **Infrastructure** : Docker, Docker Compose
+- **Dataset** : Sample Superstore (GitHub)
+
+---
+
+## 🗃️ Dataset
+
+**Source** : [Sample Superstore](https://github.com/leonism/sample-superstore)
+
+| Colonne | Description |
+|---------|-------------|
+| Order ID | Identifiant commande |
+| Order Date | Date commande |
+| Customer ID | Identifiant client |
+| Product Name | Nom produit |
+| Category | Catégorie |
+| Sub-Category | Sous-catégorie |
+| Sales | CA |
+| Quantity | Quantité |
+| Discount | Remise |
+| Profit | Profit |
+| Region | Région |
+| State | État |
+| City | Ville |
 
 **Période** : 2014-2017
 **Taille** : ~10 000 lignes
 
 ---
 
-## 🎓 Exercices pour les élèves
+## 📝 Changelog
 
-### **Atelier 1 - KPI de base** (30 min)
-1. Calculer le CA total
-2. Calculer le panier moyen
-3. Afficher le CA par mois
-4. Trouver le top 5 des produits
+### v2.0.0
+- ✅ Matrice BCG avec classification automatique
+- ✅ Analyse produits faible marge
+- ✅ Waterfall profit catégories
+- ✅ Matrice performance/marge
+- ✅ Moyenne mobile et comparaison N-1
+- ✅ Analyse saisonnalité (radar + heatmap)
+- ✅ Performance CA/client par zone
+- ✅ Heatmap États par marge
+- ✅ Classement villes multi-critères
 
-### **Atelier 2 - Analyse business** (45 min)
-1. Quelle catégorie est la plus rentable ?
-2. Quels produits génèrent du CA mais peu de profit ?
-3. Quels mois sont les plus performants ?
-4. Quelle région a le plus de clients ?
-
-### **Atelier 3 - Dashboard final** (60 min)
-1. Créer un dashboard avec :
-   - 1 KPI principal
-   - 2 graphiques de votre choix
-   - 1 tableau filtrable
-   - Filtres : date, catégorie, région
-
----
-
-## 🔧 Personnalisation
-
-### Ajouter un nouveau KPI
-
-**1. Dans l'API (`backend/main.py`)** :
-```python
-@app.get("/kpi/mon_nouveau_kpi", tags=["KPI"])
-def get_mon_nouveau_kpi():
-    # Votre calcul ici
-    resultat = df.groupby('colonne').sum()
-    return resultat.to_dict('records')
-```
-
-**2. Dans le dashboard (`frontend/dashboard.py`)** :
-```python
-# Appeler l'API
-data = appeler_api("/kpi/mon_nouveau_kpi")
-
-# Créer la visualisation
-fig = px.bar(data, x='colonne', y='valeur')
-st.plotly_chart(fig)
-```
+### v1.0.0
+- ✅ KPI globaux
+- ✅ Top produits
+- ✅ Performance catégories
+- ✅ Évolution temporelle
+- ✅ Performance géographique
+- ✅ Analyse clients
 
 ---
 
-## 🐛 Résolution de problèmes
+## 📄 Licence
 
-### ❌ Erreur "Connection refused"
-➡️ Vérifiez que l'API est démarrée : `python backend/main.py`
-
-### ❌ Erreur "Module not found"
-➡️ Installez les dépendances : `pip install -r requirements.txt`
-
-### ❌ Dashboard vide
-➡️ Vérifiez l'URL de l'API dans `dashboard.py` (ligne 41)
-
-### ❌ Erreur de chargement du dataset
-➡️ Vérifiez votre connexion internet (le CSV est téléchargé depuis GitHub)
-
----
-
-## 📚 Documentation complète
-
-### **FastAPI**
-- [Documentation officielle](https://fastapi.tiangolo.com/)
-- [Tutoriels](https://fastapi.tiangolo.com/tutorial/)
-
-### **Streamlit**
-- [Documentation officielle](https://docs.streamlit.io/)
-- [Galerie d'exemples](https://streamlit.io/gallery)
-
-### **Plotly**
-- [Documentation Python](https://plotly.com/python/)
-- [Galerie de graphiques](https://plotly.com/python/basic-charts/)
-
-### **Pandas**
-- [Documentation officielle](https://pandas.pydata.org/docs/)
-- [10 minutes to pandas](https://pandas.pydata.org/docs/user_guide/10min.html)
-
----
+MIT License - Projet pédagogique
