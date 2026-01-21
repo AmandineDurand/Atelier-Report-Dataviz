@@ -857,7 +857,7 @@ with tab2:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                La courbe de Pareto visualise la concentration extrême du CA : les 50 premiers produits (sur 1 850) génèrent déjà 80% du CA total, formant le coude critique de la courbe. Le premier produit seul pèse environ 60 000€, et les 10 premiers cumulent près de 15% du CA. Cette visualisation confirme qu'un tout petit nombre de références pilote la performance : concentrer les efforts commerciaux, la gestion des stocks et les négociations fournisseurs sur ces 50 produits critiques pourrait maximiser l'efficacité opérationnelle, tandis que les 1 800 autres références mériteraient une gestion plus automatisée et simplifiée.
+                La courbe de Pareto visualise la concentration extrême du CA : les 50 premiers produits (sur 1 850) génèrent déjà 30% du CA total, formant le coude critique de la courbe. Le premier produit seul pèse environ 60 000€, et les 10 premiers cumulent près de 10% du CA. Cette visualisation confirme qu'un tout petit nombre de références pilote la performance : concentrer les efforts commerciaux, la gestion des stocks et les négociations fournisseurs sur ces 50 produits critiques pourrait maximiser l'efficacité opérationnelle, tandis que les 1 800 autres références mériteraient une gestion plus automatisée et simplifiée.
                 </div>
             """,
             unsafe_allow_html=True
@@ -975,12 +975,12 @@ with tab3:
         # Statistiques temporelles
         col_stats1, col_stats2, col_stats3 = st.columns(3)
         with col_stats1:
-            st.metric("📈 CA moyen/période", formater_euro(df_temporal['ca'].mean()))
+            st.metric("CA moyen/période", formater_euro(df_temporal['ca'].mean()))
         with col_stats2:
-            st.metric("📊 Commandes moy/période", formater_nombre(int(df_temporal['nb_commandes'].mean())))
+            st.metric("Commandes moy/période", formater_nombre(int(df_temporal['nb_commandes'].mean())))
         with col_stats3:
             meilleure_periode = df_temporal.loc[df_temporal['ca'].idxmax()]
-            st.metric("🏆 Meilleure période", meilleure_periode['periode'])
+            st.metric("Meilleure période", meilleure_periode['periode'])
 
         st.divider()
 
@@ -989,51 +989,11 @@ with tab3:
 
         # Statistiques
         stats_temp = temporal_avance['statistiques']
-        col_t1, col_t2, col_t3, col_t4 = st.columns(4)
-        with col_t1:
-            st.metric("CA moyen/mois", formater_euro(stats_temp['ca_moyen_mensuel']))
+        col_t2, col_t4 = st.columns(2)
         with col_t2:
             st.metric("Croissance moy.", f"{stats_temp['croissance_moyenne']:.1f}%")
-        with col_t3:
-            st.metric("Meilleur mois", stats_temp['meilleur_mois'])
         with col_t4:
             st.metric("Pire mois", stats_temp['pire_mois'])
-
-        st.divider()
-
-        # Moyenne Mobile
-        st.markdown("#### 📈 Moyenne Mobile")
-
-        # Graphique avec moyenne mobile
-        fig_mm = go.Figure()
-
-        fig_mm.add_trace(go.Scatter(
-            x=df_temp['periode'],
-            y=df_temp['ca'],
-            mode='lines+markers',
-            name='CA réel',
-            line=dict(color='#3498db', width=2),
-            fill='tozeroy',
-            fillcolor='rgba(52, 152, 219, 0.2)'
-        ))
-
-        fig_mm.add_trace(go.Scatter(
-            x=df_temp['periode'],
-            y=df_temp['ca_mm3'],
-            mode='lines',
-            name='Moyenne mobile 3 mois',
-            line=dict(color='#e74c3c', width=3, dash='solid')
-        ))
-
-        fig_mm.update_layout(
-            title="CA avec Moyenne Mobile (3 mois)",
-            xaxis_title="Période",
-            yaxis_title="CA (€)",
-            height=450,
-            hovermode='x unified'
-        )
-
-        st.plotly_chart(fig_mm, use_container_width=True)
 
         st.markdown(
             """
@@ -1041,9 +1001,7 @@ with tab3:
                 <div class="info-title">Data Storytelling</div>
                 Le CA moyen mensuel atteint 47 858€ avec 104 commandes moyennes par mois, le pic historique 
                 restant novembre 2018. La croissance moyenne de 40,7% démontre une dynamique exceptionnelle, bien que le pire mois (février 
-                2015) contraste fortement avec cette tendance. La moyenne mobile sur 3 mois lisse la volatilité et révèle une 
-                accélération constante de fin 2017 à fin 2018, où la courbe rouge (tendance) converge puis dépasse 
-                ponctuellement la courbe bleue (réel), signalant un momentum positif qui devrait être capitalisé en 2019.
+                2015) contraste fortement avec cette tendance. 
             </div>
             """,
             unsafe_allow_html=True
@@ -1158,9 +1116,9 @@ with tab4:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                La heatmap révèle une performance par État très contrastée : la Californie (West) domine en taille et marge, 
-                tandis que Pennsylvania, Texas, Ohio et Illinois (en rouge/orange) affichent des marges négatives ou très 
-                faibles malgré des volumes importants. New York, bien que générant du CA, souffre également de rentabilité. 
+                La heatmap révèle une performance par État très contrastée : la Californie (West) domine en taille mais pas en marge, 
+                tout comme Pennsylvania, Texas, Ohio et Illinois (en rouge/orange) qui affichent des marges négatives ou très 
+                faibles malgré des volumes importants. New York, bien que générant du CA, souffre également de rentabilité. A l'inverse, des états peu volumineux ont des marges plutôt élevées.
                 Cette cartographie met en évidence un paradoxe : les plus gros États ne sont pas les plus rentables. 
                 L'entreprise doit investiguer les causes (prix trop bas, coûts logistiques, mix produit défavorable) et 
                 corriger rapidement la situation dans ces États stratégiques pour transformer du volume en profit.
@@ -1405,48 +1363,6 @@ with tab5:
             unsafe_allow_html=True
         )
 
-        # Top clients RFM
-        st.markdown("#### 🏆 Top 20 Clients (Score RFM)")
-        df_top_rfm = pd.DataFrame(rfm_data['top_clients'])
-
-        fig_top_rfm = px.scatter(
-            df_top_rfm,
-            x='frequency',
-            y='monetary',
-            size='recency',
-            color='segment',
-            hover_name='client',
-            title="Top Clients : Fréquence vs Montant (taille = récence)",
-            labels={'frequency': 'Fréquence', 'monetary': 'Montant Total (€)', 'recency': 'Récence (j)'},
-            height=500
-        )
-        st.plotly_chart(fig_top_rfm, use_container_width=True)
-
-        # Tableau détaillé
-        with st.expander("📋 Tableau détaillé des top clients RFM"):
-            st.dataframe(
-                df_top_rfm[['client', 'recency', 'frequency', 'monetary', 'rfm_score', 'segment']].rename(columns={
-                    'client': 'Client',
-                    'recency': 'Récence (j)',
-                    'frequency': 'Fréquence',
-                    'monetary': 'Montant (€)',
-                    'rfm_score': 'Score RFM',
-                    'segment': 'Segment'
-                }),
-                use_container_width=True,
-                hide_index=True
-            )
-
-        st.markdown(
-            """
-            <div class="info-card">
-                <div class="info-title">Data Storytelling</div>
-                L'analyse des top clients par score RFM révèle des profils d'achat très différenciés : certains clients "Champions" combinent haute fréquence (11-12 achats) et montant élevé (10 000-12 000€), tandis que d'autres privilégient des achats moins fréquents mais très généreux. Le cluster visible autour de 9-12 achats et 4 000-8 000€ représente le cœur des meilleurs clients. Cette dispersion suggère l'existence de plusieurs typologies de clients premium nécessitant des stratégies différenciées : programmes de fidélité pour les acheteurs fréquents à montant modéré, et relation commerciale personnalisée pour les gros acheteurs occasionnels.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
     # --- CUSTOMER LIFETIME VALUE ---
     with client_tab3:
         st.markdown("#### 💰 Customer Lifetime Value (CLV)")
@@ -1557,32 +1473,6 @@ with tab5:
 
         st.divider()
 
-        # Par segment
-        df_delai_segment = pd.DataFrame(delai_data['par_segment'])
-
-        fig_delai_segment = go.Figure()
-
-        fig_delai_segment.add_trace(go.Bar(
-            name='Délai Moyen',
-            x=df_delai_segment['segment'],
-            y=df_delai_segment['delai_moyen'],
-            marker_color='#3498db'
-        ))
-
-        fig_delai_segment.add_trace(go.Bar(
-            name='Délai Médian',
-            x=df_delai_segment['segment'],
-            y=df_delai_segment['delai_median'],
-            marker_color='#e74c3c'
-        ))
-
-        fig_delai_segment.update_layout(
-            title="Délai de Réachat par Segment (jours)",
-            barmode='group',
-            height=400
-        )
-        st.plotly_chart(fig_delai_segment, use_container_width=True)
-
         # Distribution des délais
         distribution_delai = delai_data['distribution']
 
@@ -1607,7 +1497,7 @@ with tab5:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                Le délai moyen de réachat de 189 jours (médiane 129 jours) sur 4 199 rachats révèle un cycle d'achat relativement long, cohérent avec un modèle B2B de fournitures et équipements. La distribution montre une concentration dans les tranches 90-180 jours (environ 2 000 rachats), suggérant un cycle naturel trimestriel ou semestriel. Les 3 segments client (Consumer, Corporate, Home Office) affichent des délais comparables (environ 190 jours moyens), indiquant des comportements d'approvisionnement similaires. Cette donnée permet d'optimiser les relances commerciales : contacter proactivement les clients 15-30 jours avant leur date de réachat prévue pourrait améliorer la rétention et prévenir le churn.
+                Le délai moyen de réachat de 189 jours (médiane 129 jours) sur 4 199 rachats révèle un cycle d'achat relativement long, cohérent avec un modèle B2B de fournitures et équipements. La distribution montre une concentration dans les tranches 90-180 jours (environ 2 000 rachats), suggérant un cycle naturel trimestriel ou semestriel. Cette donnée permet d'optimiser les relances commerciales : contacter proactivement les clients 15-30 jours avant leur date de réachat prévue pourrait améliorer la rétention et prévenir le churn.
             </div>
             """,
             unsafe_allow_html=True
@@ -1899,20 +1789,6 @@ with tab6:
 
         st.plotly_chart(fig_cout, use_container_width=True)
 
-        # Graphique marge unitaire
-        fig_marge_unit = px.bar(
-            df_cout,
-            x='produit',
-            y='marge_unitaire',
-            color='marge_pct',
-            title="Marge Unitaire par Produit",
-            labels={'marge_unitaire': 'Marge Unitaire (€)', 'produit': 'Produit', 'marge_pct': 'Marge (%)'},
-            color_continuous_scale='RdYlGn',
-            height=450
-        )
-        fig_marge_unit.update_xaxes(tickangle=-45, ticktext=df_cout['produit'].str[:20] + '...', tickvals=df_cout['produit'])
-        st.plotly_chart(fig_marge_unit, use_container_width=True)
-
         # Tableau détaillé
         with st.expander("📋 Tableau détaillé"):
             st.dataframe(
@@ -1933,7 +1809,7 @@ with tab6:
             """
             <div class="info-card">
                 <div class="info-title">Data Storytelling</div>
-                39 produits affichent des marges unitaires insuffisantes avec un prix de vente moyen de 809€ contre un coût moyen de 757€, laissant une marge dérisoire de 52€ (6,5%). Le graphique Prix vs Coût révèle plusieurs produits vendus à perte ou quasi à perte, notamment le Canon imageCLASS (près de 4 000€ de prix pour un coût similaire) et plusieurs systèmes de reliure où le coût dépasse le prix de vente (barres rouges supérieures aux vertes). La carte des marges unitaires confirme ce diagnostic avec de nombreux produits en rouge (marge négative) ou jaune (marge quasi-nulle). Ces références toxiques nécessitent une action immédiate : augmentation tarifaire de 15-25%, renégociation des prix d'achat fournisseurs, ou retrait pur et simple du catalogue pour éviter de subventionner les clients avec des produits non rentables.
+                Le graphique Prix vs Coût révèle plusieurs produits vendus à perte ou quasi à perte, notamment le Canon imageCLASS (près de 4 000€ de prix pour un coût similaire) et plusieurs systèmes de reliure où le coût dépasse le prix de vente (barres rouges supérieures aux vertes). Ces références toxiques nécessitent une action immédiate : augmentation tarifaire de 15-25%, renégociation des prix d'achat fournisseurs, ou retrait pur et simple du catalogue pour éviter de subventionner les clients avec des produits non rentables.
             </div>
             """,
             unsafe_allow_html=True
